@@ -95,9 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const isOpenCheck = group.querySelector(`#meld${id}-is-open`);
             const isYaochuCheck = group.querySelector(`#meld${id}-is-yaochu`);
 
+            const kantsuRadio = group.querySelector(`#meld${id}-kantsu`);
+
             // Pinfu forces closed shuntsu
             shuntsuRadio.disabled = isPinfu;
             koutsuRadio.disabled = isPinfu;
+            kantsuRadio.disabled = isPinfu; // Kantsu is not allowed in Pinfu
             isOpenCheck.disabled = isPinfu;
             if (isPinfu) {
                 shuntsuRadio.checked = true;
@@ -133,19 +136,24 @@ document.addEventListener('DOMContentLoaded', () => {
             return 25;
         }
 
-        if (state.isPinfu) {
-            return state.isRon ? 30 : 20; // Tsumo Pinfu is 20, Ron Pinfu is technically not possible without fu.
+        // For a Tsumo win, if Pinfu is checked, the fu is fixed at 20.
+        // For a Ron win, Pinfu is not possible, so we proceed with normal fu calculation.
+        // The UI logic already prevents selecting Pinfu with incompatible options.
+        if (state.isPinfu && !state.isRon) {
+            return 20; // Tsumo Pinfu is always 20 fu.
         }
 
-        let fu = 20; // Base fu
+        let fu = 20; // Base fu (futei)
 
         // Win condition fu
         if (state.isMenzen && state.isRon) {
-            fu += 10; // Menzen Ron
+            fu += 10; // Menzen Ron bonus
         }
-        if (!state.isRon) { // Tsumo
-            fu += 2;
-            // Pinfu tsumo is not possible, so no need for that special check here
+        if (!state.isRon) { // Tsumo win
+            // Exception: Tsumo Pinfu gives 0 fu for the tsumo part, which is handled above.
+            if (!state.isPinfu) {
+                 fu += 2;
+            }
         }
 
         // Wait type fu
@@ -160,13 +168,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Meld fu
         state.melds.forEach(meld => {
-            if (meld.type === 'koutsu') {
-                let meldFu = meld.isYaochu ? 8 : 4; // Anko (closed)
+            let meldFu = 0;
+            if (meld.type === 'koutsu') { // Triplets
+                meldFu = meld.isYaochu ? 8 : 4; // Base for closed triplet (Anko)
                 if (meld.isOpen) {
-                    meldFu /= 2; // Minko (open)
+                    meldFu /= 2; // Half for open triplet (Minko)
                 }
-                fu += meldFu;
+            } else if (meld.type === 'kantsu') { // Quads
+                meldFu = meld.isYaochu ? 32 : 16; // Base for closed quad (Ankan)
+                if (meld.isOpen) {
+                    meldFu /= 2; // Half for open quad (Daiminkan/Shouminkan)
+                }
             }
+            fu += meldFu;
         });
 
         return fu;
