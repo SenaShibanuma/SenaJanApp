@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resultHanFu: document.getElementById('result-han-fu'),
         resultPoints: document.getElementById('result-points'),
         scoreTable: document.getElementById('score-table'),
+        resultFuTotalDisplay: document.getElementById('result-fu-total-display'),
 
         // Fu Breakdown
         fuBreakdownContent: document.getElementById('fu-breakdown-content'),
@@ -343,6 +344,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         elements.fuTotalUnrounded.textContent = unrounded;
         elements.fuTotalRounded.textContent = rounded;
+
+        // Update the new display in the results area
+        updateFuDisplay(elements.resultFuTotalDisplay, rounded);
     }
 
 
