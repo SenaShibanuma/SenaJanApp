@@ -39,13 +39,15 @@
                     <input type="checkbox" id="is-chiitoitsu">
                     <label for="is-chiitoitsu">七対子 (チートイツ)</label>
                 </div>
+                <div class="form-group global-modifiers">
+                    <div class="yaku-selector">
+                        <input type="checkbox" id="is-tanyao">
+                        <label for="is-tanyao">断幺九 (タンヤオ)</label>
+                    </div>
+                </div>
 
                 <fieldset id="standard-hand-fieldset">
                     <div class="form-group global-modifiers">
-                        <div class="yaku-selector">
-                            <input type="checkbox" id="is-tanyao">
-                            <label for="is-tanyao">断幺九 (タンヤオ)</label>
-                        </div>
                         <div class="yaku-selector">
                             <input type="checkbox" id="is-pinfu">
                             <label for="is-pinfu">平和 (ピンフ)</label>
@@ -228,8 +230,11 @@
                     <span class="fu-value" id="fu-wait">0</span>
                 </div>
             </div>
-             <div id="fu-special-content" style="display: none;">
-                <!-- JS will populate this for Chiitoitsu/Pinfu -->
+            <div id="fu-special-content" style="display: none;">
+                <div class="fu-row fu-chiitoitsu-display">
+                    <span class="fu-label">七対子</span>
+                    <span class="fu-value">25</span>
+                </div>
             </div>
             <hr>
             <div class="fu-total-row">

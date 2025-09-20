@@ -17,50 +17,46 @@
 - 各設定項目（基本設定、手牌構成、詳細設定など）を`<section class="card">`で意味的に分割し、`input-area`内に配置する。
 - **符の内訳表示:**
   - `fu-breakdown-area`内に、符計算の各項目のためのプレースホルダー要素を配置する。
-  - `fu-breakdown-content`と`fu-special-content`の2つのコンテナを持ち、通常手と特殊役（七対子など）で表示を切り替える。
+  - `fu-breakdown-content`に通常の内訳を表示。
+  - `fu-special-content`に七対子専用の「25符」表示要素 (`.fu-chiitoitsu-display`) を配置し、通常は非表示にする。
 - **手牌構成:**
-  - `<div class="section-header">`を追加し、タイトル(`h2`)と符底(`span.fu-base-display`)を横並びに配置。
-  - 「七対子」チェックボックスを最上部に配置。
-  - 「断幺九」「平和」のチェックボックスとラベルをそれぞれ`<div class="yaku-selector">`で囲み、個別にスタイリングできるようにする。
-  - **`<div class="melds-grid">`**:
-    - CSS Gridを使用して、面子と雀頭の入力を表形式で整列させるためのコンテナ。
-    - 4列（ラベル、種類、オプション、符）で構成される。
-    - 先頭に`<div class="grid-header">`を配置し、各列のタイトルを表示する。
-    - 4つの面子と雀頭の各行は、`<div class="meld-group">`と`<div class="pair-group">`をそのまま使用する。これらの要素に`display: contents`を適用することで、内部の要素が直接グリッドアイテムとして扱われる。
-  - 面子と雀頭の設定全体を`<fieldset id="standard-hand-fieldset">`で囲み、一括での有効/無効化を容易にする。
+  - 「七対子」と「断幺九」のチェックボックスを`<fieldset>`の外に配置し、常に選択可能にする。
+  - 「平和」チェックボックスは`<fieldset>`内に配置し、七対子選択時に無効化されるようにする。
+  - **`melds-table`**: `<table>`レイアウトを使用して面子入力を構成する。
+  - 面子と雀頭、待ち方など、七対子と両立しない設定項目を`<fieldset id="standard-hand-fieldset">`で囲み、一括での有効/無効化を容易にする。
 
 ## 3. JavaScript設計 (`script.js`)
-- **イベント駆動:** ユーザーの入力イベント（`input`）をトリガーとして、計算処理と画面更新を実行する。
+- **イベント駆動:** ユーザーの入力イベント（`input`, `change`）をトリガーとして、計算処理と画面更新を実行する。
 - **状態管理:**
-  - `updateState()`: UIから現在の入力状態を読み取り、JavaScriptオブジェクトに格納する。
-  - `updateControlStates()`: マスターコントロール（七対子、平和、断幺九）の状態に基づき、従属するUI要素の有効/無効状態を更新する。
+  - `updateState()`: UIから現在の入力状態を読み取り、JavaScriptオブジェクトに格納する。七対子と断幺九の複合を許容するように修正。
+  - `updateControlStates()`: UI要素の有効/無効状態を更新する。
+    - **順子選択時の制御:** 面子種別で「順子」が選択された場合、その面子の「鳴き」「幺九牌」チェックボックスを無効化し、CSSクラス `.option-disabled` を付与する。
+    - **グローバル役の制御:** 「平和」や「断幺九」が選択された場合、関連する面子や雀頭のオプションを上書きして無効化する。
 - **責務の分離:**
   - **UI更新ロジック:** `updateControlStates`がUIの見た目（`disabled`属性やCSSクラス）を制御する。`updateYakuVisuals`ヘルパー関数が役選択の見た目を更新する。
   - **計算ロジック:** `calculateFu`, `calculateScore`が状態オブジェクトを元に計算のみを行う。
-    - `calculateFu`: 符計算を行い、各項目の符（符底、面子、待ちなど）、特殊役情報、切り上げ前後の合計符を含む詳細な**オブジェクト**を返す。
+    - `calculateFu`: 特殊役（七対子、平和ツモ）の場合でも、`special`キーを含む完全な内訳オブジェクトを返すように修正。
   - **表示ロジック:** `updateDisplay`, `generateScoreTable`, `highlightCell`が計算結果を画面に描画する。
-    - `updateFuBreakdownUI` (新規): `calculateFu`から返されたオブジェクトを元に、符の内訳表示エリアを更新する。
-- **初期化:** `init()`関数が全てのイベントリスナーを設定し、初期表示を生成する。
+    - `updateFuBreakdownUI`: `calculateFu`から返されたオブジェクトを元に、符の内訳表示エリアを更新する。
+      - **通常時:** 全ての符項目をそのまま表示する。
+      - **平和ツモ時:** 「和了り方」の行に `.fu-strikethrough` クラスを付与する。
+      - **七対子時:** 全ての通常項目に `.fu-strikethrough` クラスを付与し、`#fu-special-content` を表示する。
+- **初期化:** `init()`関数が全ての`input`イベントリスナーを設定する。
+  - **排他制御:** `isChiitoitsu`と`isPinfu`に`change`イベントリスナーを追加し、一方がチェックされたらもう一方のチェックを外すことで、役の複合をUIレベルで防止する。
 - **メインループ:** `mainUpdate()`が上記関数群を呼び出し、UIの変更から再計算、再描画までの一連の流れを制御する。
 
 ## 4. CSS設計 (`style.css`)
 - **レイアウト:**
-  - Flexboxを使い、PCなどの幅広の画面では2カラムレイアウトを実現 (`.container`に`display: flex`)。
-  - `fu-breakdown-area`は`position: sticky`で画面右側に固定表示する。
-  - **手牌構成エリア**:
-    - `.melds-grid`に`display: grid`を適用し、ヘッダー付きの表形式レイアウトを実装。
-    - `display: contents`を`.meld-group`と`.pair-group`に適用し、HTML構造を変更せずにグリッドレイアウトを実現。
-  - **レスポンシブデザイン**:
-    - `@media (max-width: 800px)`: 全体を1カラムにスタック。
-    - `@media (max-width: 640px)`: `.melds-grid`のレイアウトを`display: block`に戻し、各面子入力をカード形式で縦に積むことで、狭い画面での可読性を確保。
+  - `<table>` を使用して面子入力エリアを構成 (`.melds-table`)。
 - **UI状態の可視化:**
   - **アクティブな役:** JSによって`.yaku-selector`に`.yaku-active`クラスが付与され、背景色を変更して選択状態を明確にする。
   - **非アクティブなUI:**
     - `fieldset.disabled`クラスで関連エリア全体を囲む。
-    - `opacity`を少し下げ、`pointer-events: none`で操作を禁止する。
-    - `fieldset.disabled label`セレクタを使い、内部のラベルに`text-decoration: line-through`を適用して、読みにくさを解消しつつ非アクティブであることを明確に示す。
+    - `.option-disabled`クラス: `label`に`text-decoration: line-through`などを適用し、個別のオプションが無効であることを示す。
+    - `.fu-strikethrough`クラス: 符の内訳表示で、無視される項目に`text-decoration: line-through`を適用する。
 - **変数:** CSSカスタムプロパティでカラーテーマを管理し、一貫性を保つ。
 
 ## 5. UIの動的制御
-- **七対子選択時:** `standard-hand-fieldset`全体を無効化し、CSSで非アクティブ化スタイルを適用する。符の内訳表示も「七対子: 25符」という専用の表示に切り替わる。
-- **平和/断幺九選択時:** 関連するチェックボックスやラジオボタンを個別に`disabled`にし、ユーザーが操作できないようにする。同時に、選択された役のコンテナに`.yaku-active`クラスを付与して視覚的にハイライトする。これらの変更は即座に`mainUpdate`関数を呼び出し、UI全体が再評価・再描画される。
+- **七対子選択時:** `standard-hand-fieldset`全体が無効化される。「断幺九」は選択可能なまま残る。符の内訳表示は、各項目が打ち消し線で表示され、「25符」が別途表示される。
+- **平和選択時:** 関連するチェックボックスやラジオボタンが個別に`disabled`になり、平和の条件に固定される。
+- **順子選択時:** 各面子行で「順子」が選択されると、その行の「鳴き」「幺九牌」オプションが `.option-disabled` スタイルで非活性表示になる。

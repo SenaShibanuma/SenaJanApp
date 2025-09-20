@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.isMenzen = state.melds.every(meld => !meld.isOpen);
         } else { // Chiitoitsu
             state.isPinfu = false;
-            state.isTanyao = false;
+            state.isTanyao = elements.isTanyao.checked; // Tanyao can be combined
             state.isMenzen = true;
             state.wait = 'tanki';
             state.pair = {};
@@ -95,13 +95,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateYakuVisuals() {
-        // Update visual state for Tanyao
-        const tanyaoParent = elements.isTanyao.closest('.yaku-selector');
-        tanyaoParent.classList.toggle('yaku-active', elements.isTanyao.checked);
-
-        // Update visual state for Pinfu
-        const pinfuParent = elements.isPinfu.closest('.yaku-selector');
-        pinfuParent.classList.toggle('yaku-active', elements.isPinfu.checked);
+        elements.isChiitoitsu.closest('.yaku-selector')?.classList.toggle('yaku-active', elements.isChiitoitsu.checked);
+        elements.isTanyao.closest('.yaku-selector')?.classList.toggle('yaku-active', elements.isTanyao.checked);
+        elements.isPinfu.closest('.yaku-selector')?.classList.toggle('yaku-active', elements.isPinfu.checked);
     }
 
     function updateControlStates() {
@@ -109,47 +105,68 @@ document.addEventListener('DOMContentLoaded', () => {
         const isPinfu = elements.isPinfu.checked;
         const isTanyao = elements.isTanyao.checked;
 
-        // --- 1. Chiitoitsu disables everything else ---
+        // --- 1. Chiitoitsu disables standard hand inputs ---
         elements.standardHandFieldset.disabled = isChiitoitsu;
         elements.standardHandFieldset.classList.toggle('disabled', isChiitoitsu);
-        if (isChiitoitsu) {
-            // Uncheck Pinfu/Tanyao if Chiitoitsu is selected
-            if (elements.isPinfu.checked) elements.isPinfu.checked = false;
-            if (elements.isTanyao.checked) elements.isTanyao.checked = false;
-
-            // No need to proceed further if it's chiitoitsu
-            updateYakuVisuals(); // Ensure visuals are reset
-            return;
+        if (isChiitoitsu && elements.isPinfu.checked) {
+            elements.isPinfu.checked = false; // Ensure Pinfu is off
         }
 
-        // --- 2. Pinfu / Tanyao Logic ---
-        updateYakuVisuals(); // Update visuals based on current state
+        // --- 2. Update visuals for global yaku ---
+        updateYakuVisuals();
 
-        // Loop through melds to set states based on global modifiers
+        // --- 3. Update individual meld controls based on selections ---
         elements.meldGroups.forEach(group => {
             const id = group.dataset.meldId;
-            const shuntsuRadio = group.querySelector(`#meld${id}-shuntsu`);
-            const koutsuRadio = group.querySelector(`#meld${id}-koutsu`);
+            const type = group.querySelector(`input[name="meld${id}-type"]:checked`).value;
+            const isShuntsu = type === 'shuntsu';
+
             const isOpenCheck = group.querySelector(`#meld${id}-is-open`);
             const isYaochuCheck = group.querySelector(`#meld${id}-is-yaochu`);
+            const openOptionCell = isOpenCheck.closest('.meld-options');
+            const yaochuOptionCell = isYaochuCheck.closest('.meld-options');
 
-            const kantsuRadio = group.querySelector(`#meld${id}-kantsu`);
-
-            // Pinfu forces closed shuntsu
-            shuntsuRadio.disabled = isPinfu;
-            koutsuRadio.disabled = isPinfu;
-            kantsuRadio.disabled = isPinfu; // Kantsu is not allowed in Pinfu
-            isOpenCheck.disabled = isPinfu;
-            if (isPinfu) {
-                shuntsuRadio.checked = true;
+            // A. Shuntsu logic: Shuntsu cannot be open (if pinfu is not set) and cannot be yaochu.
+            // This is independent of global settings but can be overridden by them.
+            const isShuntsuDisabled = isShuntsu;
+            isOpenCheck.disabled = isShuntsuDisabled;
+            isYaochuCheck.disabled = isShuntsuDisabled;
+            openOptionCell.classList.toggle('option-disabled', isShuntsuDisabled);
+            yaochuOptionCell.classList.toggle('option-disabled', isShuntsuDisabled);
+            if (isShuntsu) {
                 isOpenCheck.checked = false;
+                isYaochuCheck.checked = false;
             }
 
-            // Pinfu or Tanyao force non-yaochu
-            const isYaochuDisabled = isPinfu || isTanyao;
-            isYaochuCheck.disabled = isYaochuDisabled;
-            if (isYaochuDisabled) {
+            // B. Global overrides (Pinfu / Tanyao)
+            const shuntsuRadio = group.querySelector(`#meld${id}-shuntsu`);
+            const koutsuRadio = group.querySelector(`#meld${id}-koutsu`);
+            const kantsuRadio = group.querySelector(`#meld${id}-kantsu`);
+
+            // Pinfu forces closed shuntsu, overriding the above.
+            const isPinfuMeldLock = isPinfu && !isChiitoitsu;
+            shuntsuRadio.disabled = isPinfuMeldLock;
+            koutsuRadio.disabled = isPinfuMeldLock;
+            kantsuRadio.disabled = isPinfuMeldLock;
+            isOpenCheck.disabled = isPinfuMeldLock || isShuntsu; // Re-evaluate disabled state
+            if (isPinfuMeldLock) {
+                shuntsuRadio.checked = true;
+                isOpenCheck.checked = false;
+                openOptionCell.classList.remove('option-disabled'); // Pinfu is menzen, so this is not "disabled" visually
+            }
+
+            // Tanyao forces non-yaochu. Pinfu also forces non-yaochu.
+            // This is a stronger condition than just shuntsu.
+            const isYaochuLockedOut = (isTanyao || isPinfu) && !isChiitoitsu;
+            isYaochuCheck.disabled = isYaochuLockedOut || isShuntsu; // Re-evaluate disabled state
+            if (isYaochuLockedOut) {
                 isYaochuCheck.checked = false;
+            }
+            // Ensure visual state is correct if Tanyao/Pinfu is on
+            if(isYaochuLockedOut) {
+                 yaochuOptionCell.classList.add('option-disabled');
+            } else if (!isShuntsu) {
+                 yaochuOptionCell.classList.remove('option-disabled');
             }
         });
 
@@ -183,15 +200,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (state.handType === 'chiitoitsu') {
             fuBreakdown.special = '七対子';
-            fuBreakdown.unrounded = 25;
-            fuBreakdown.rounded = 25;
+            fuBreakdown.unrounded = 25; // Raw value is 25
+            fuBreakdown.rounded = 25;  // No rounding up for chiitoitsu
+            // All other fu components are 0, but we return them for display purposes
             return fuBreakdown;
         }
 
         // Tsumo Pinfu is a special case, fixed at 20 fu.
+        // The only fu awarded is the base 20 fu.
         if (state.isPinfu && !state.isRon) {
             fuBreakdown.special = '平和ツモ';
             fuBreakdown.base = 20;
+            // All other fu components are 0. Tsumo fu is ignored.
             fuBreakdown.unrounded = 20;
             fuBreakdown.rounded = 20;
             return fuBreakdown;
@@ -302,7 +322,40 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateFuBreakdownUI(fuBreakdown) {
         const { base, melds, pair, wait, winMethod, special, unrounded, rounded } = fuBreakdown;
 
-        // Helper to update the new display elements
+        // --- 1. Reset all strikethrough classes ---
+        const allFuRows = document.querySelectorAll('.fu-row');
+        allFuRows.forEach(row => row.classList.remove('fu-strikethrough'));
+
+        // --- 2. Update text content of all fu displays ---
+        elements.fuBase.textContent = base;
+        elements.fuWinMethod.textContent = winMethod;
+        elements.fuWait.textContent = wait;
+        elements.fuPair.textContent = pair;
+        melds.forEach((meldFu, index) => {
+            const meldElement = document.getElementById(`fu-meld${index + 1}`);
+            if (meldElement) meldElement.textContent = meldFu;
+        });
+
+        // --- 3. Handle special cases by applying strikethrough ---
+        if (special === '七対子') {
+            // Strike out all individual fu rows
+            allFuRows.forEach(row => {
+                // Exclude the special display itself if it's considered a .fu-row
+                if (!row.classList.contains('fu-chiitoitsu-display')) {
+                    row.classList.add('fu-strikethrough');
+                }
+            });
+            elements.fuSpecialContent.style.display = 'block';
+        } else if (special === '平和ツモ') {
+            // Only strike out the win method fu (tsumo fu)
+            document.getElementById('fu-win-method-row').classList.add('fu-strikethrough');
+            elements.fuSpecialContent.style.display = 'none';
+        } else {
+            // No special hand, ensure special content is hidden
+            elements.fuSpecialContent.style.display = 'none';
+        }
+
+        // --- 4. Update the main fu value displays in the form ---
         const updateFuDisplay = (element, value) => {
             if (value > 0) {
                 element.textContent = value;
@@ -312,54 +365,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        if (special) {
-            // Hide all individual fu displays for special hands like Chiitoitsu
-            updateFuDisplay(elements.winMethodFuValue, 0);
-            updateFuDisplay(elements.waitFuValue, 0);
-            updateFuDisplay(elements.pairFuValue, 0);
-            updateFuDisplay(elements.meld1FuValue, 0);
-            updateFuDisplay(elements.meld2FuValue, 0);
-            updateFuDisplay(elements.meld3FuValue, 0);
-            updateFuDisplay(elements.meld4FuValue, 0);
-        } else {
-            // Update individual fu displays for standard hands
-            updateFuDisplay(elements.winMethodFuValue, winMethod);
-            updateFuDisplay(elements.waitFuValue, wait);
-            updateFuDisplay(elements.pairFuValue, pair);
-            melds.forEach((meldFu, index) => {
-                const meldElement = elements[`meld${index + 1}FuValue`];
-                if (meldElement) {
-                    updateFuDisplay(meldElement, meldFu);
-                }
-            });
-        }
+        // For special hands, hide all individual fu displays on the form
+        const hideFormFu = (special === '七対子' || special === '平和ツモ');
+        updateFuDisplay(elements.winMethodFuValue, hideFormFu ? 0 : winMethod);
+        updateFuDisplay(elements.waitFuValue, hideFormFu ? 0 : wait);
+        updateFuDisplay(elements.pairFuValue, hideFormFu ? 0 : pair);
+        melds.forEach((meldFu, index) => {
+            const meldElement = elements[`meld${index + 1}FuValue`];
+            if (meldElement) updateFuDisplay(meldElement, hideFormFu ? 0 : meldFu);
+        });
 
-        // --- Keep old logic for the hidden panel to minimize risk ---
-        if (special) {
-            elements.fuBreakdownContent.style.display = 'none';
-            elements.fuSpecialContent.style.display = 'block';
-            elements.fuSpecialContent.innerHTML = `<div class="fu-row"><span class="fu-label">${special}</span><span class="fu-value">${unrounded}</span></div>`;
-        } else {
-            elements.fuBreakdownContent.style.display = 'block';
-            elements.fuSpecialContent.style.display = 'none';
-            elements.fuSpecialContent.innerHTML = '';
-
-            elements.fuBase.textContent = base;
-            elements.fuWinMethod.textContent = winMethod;
-            elements.fuWait.textContent = wait;
-            elements.fuPair.textContent = pair;
-            melds.forEach((meldFu, index) => {
-                const meldElement = document.getElementById(`fu-meld${index + 1}`);
-                if (meldElement) {
-                    meldElement.textContent = meldFu;
-                }
-            });
-        }
-
+        // --- 5. Update total fu values ---
         elements.fuTotalUnrounded.textContent = unrounded;
         elements.fuTotalRounded.textContent = rounded;
-
-        // Update the new display in the results area
         updateFuDisplay(elements.resultFuTotalDisplay, rounded);
     }
 
@@ -438,8 +456,22 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
 
         allControls.forEach(control => {
-            control.addEventListener('input', mainUpdate); // Use 'input' for more responsive feel on number fields
+            control.addEventListener('input', mainUpdate);
         });
+
+        // Specific listeners for mutually exclusive yaku
+        elements.isChiitoitsu.addEventListener('change', () => {
+            if (elements.isChiitoitsu.checked && elements.isPinfu.checked) {
+                elements.isPinfu.checked = false;
+            }
+        });
+
+        elements.isPinfu.addEventListener('change', () => {
+            if (elements.isPinfu.checked && elements.isChiitoitsu.checked) {
+                elements.isChiitoitsu.checked = false;
+            }
+        });
+
 
         // Initial setup
         mainUpdate();

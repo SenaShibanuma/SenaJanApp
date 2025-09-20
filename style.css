@@ -355,9 +355,34 @@ footer {
 }
 
 #fu-special-content .fu-row {
-    background-color: #fffbe6;
     border-color: #ffe58f;
 }
+
+#fu-special-content .fu-chiitoitsu-display {
+    background-color: #fffbe6;
+}
+
+
+/* Style for individually disabled options in the melds table */
+.meld-options.option-disabled label {
+    opacity: 0.5;
+    text-decoration: line-through;
+    color: var(--disabled-text-color);
+    cursor: not-allowed;
+}
+
+/* Strikethrough for fu rows in specific contexts (Pinfu+Tsumo, Chiitoitsu) */
+.fu-row.fu-strikethrough {
+    text-decoration: line-through;
+    color: var(--disabled-text-color);
+    background-color: #fafafa;
+}
+
+.fu-row.fu-strikethrough .fu-label,
+.fu-row.fu-strikethrough .fu-value {
+    color: var(--disabled-text-color);
+}
+
 
 hr {
     border: none;
