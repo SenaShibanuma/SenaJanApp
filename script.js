@@ -1,106 +1,187 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- 1. DOM Element Selection ---
     const elements = {
+        // Basic settings
         isKo: document.getElementById('is-ko'),
         isOya: document.getElementById('is-oya'),
         hanInput: document.getElementById('han-input'),
+
+        // Hand Type
+        handTypeStandard: document.getElementById('hand-type-standard'),
+        handTypeChiitoitsu: document.getElementById('hand-type-chiitoitsu'),
+
+        // Global Modifiers
+        isPinfu: document.getElementById('is-pinfu'),
+        isTanyao: document.getElementById('is-tanyao'),
+
+        // Standard Hand Fieldset
+        standardHandFieldset: document.getElementById('standard-hand-fieldset'),
+
+        // Melds (within the fieldset)
+        meldGroups: document.querySelectorAll('.meld-group'),
+
+        // Pair (within the fieldset)
+        pairIsYakuhai: document.getElementById('pair-is-yakuhai'),
+
+        // Wait and Win type (within the fieldset)
+        waitType: document.getElementById('wait-type'),
         winRon: document.getElementById('win-ron'),
         winTsumo: document.getElementById('win-tsumo'),
-        isMenzen: document.getElementById('is-menzen'),
-        waitType: document.getElementById('wait-type'),
-        pairType: document.getElementById('pair-type'),
-        isPinfuTsumo: document.getElementById('is-pinfu-tsumo'),
-        isChiitoitsu: document.getElementById('is-chiitoitsu'),
+
+        // Results
         resultHanFu: document.getElementById('result-han-fu'),
         resultPoints: document.getElementById('result-points'),
-        scoreTable: document.getElementById('score-table'),
-        fuFieldset: document.getElementById('fu-fieldset'),
-        meldInputs: document.querySelectorAll('.meld-input')
+        scoreTable: document.getElementById('score-table')
     };
 
-    // --- 2. State Management & Initial Calculation ---
+
+    // --- 2. State Management & UI Logic ---
     const state = {};
 
     function updateState() {
         state.isOya = elements.isOya.checked;
         state.han = parseInt(elements.hanInput.value, 10) || 0;
-        state.isRon = elements.winRon.checked;
-        state.isMenzen = elements.isMenzen.checked;
-        state.wait = elements.waitType.value;
-        state.pair = elements.pairType.value;
-        state.pinfuTsumo = elements.isPinfuTsumo.checked;
-        state.chiitoitsu = elements.isChiitoitsu.checked;
+        state.handType = elements.handTypeChiitoitsu.checked ? 'chiitoitsu' : 'standard';
 
-        state.melds = {};
-        elements.meldInputs.forEach(input => {
-            state.melds[input.id] = parseInt(input.value, 10) || 0;
-        });
+        state.isPinfu = elements.isPinfu.checked;
+        state.isTanyao = elements.isTanyao.checked;
+        state.isRon = elements.winRon.checked;
+
+        if (state.handType === 'standard') {
+            state.wait = elements.waitType.value;
+            state.pair = {
+                isYakuhai: elements.pairIsYakuhai.checked
+            };
+            state.melds = Array.from(elements.meldGroups).map(group => {
+                const id = group.dataset.meldId;
+                return {
+                    id,
+                    type: group.querySelector(`input[name="meld${id}-type"]:checked`).value,
+                    isOpen: group.querySelector(`#meld${id}-is-open`).checked,
+                    isYaochu: group.querySelector(`#meld${id}-is-yaochu`).checked
+                };
+            });
+            // A hand is menzen (closed) if no melds are open.
+            state.isMenzen = state.melds.every(meld => !meld.isOpen);
+        } else {
+            // Chiitoitsu is always a closed hand, pair wait.
+            state.isMenzen = true;
+            state.wait = 'tanki'; // Technically a pair wait, tanki is the closest for fu.
+            state.pair = {};
+            state.melds = [];
+        }
     }
+
+    function updateControlStates() {
+        const isChiitoitsu = elements.handTypeChiitoitsu.checked;
+        const isPinfu = elements.isPinfu.checked;
+        const isTanyao = elements.isTanyao.checked;
+
+        // --- Global Hand Type ---
+        elements.standardHandFieldset.disabled = isChiitoitsu;
+        elements.isPinfu.disabled = isChiitoitsu;
+        elements.isTanyao.disabled = isChiitoitsu;
+        if (isChiitoitsu) {
+            if (elements.isPinfu.checked) elements.isPinfu.checked = false;
+            if (elements.isTanyao.checked) elements.isTanyao.checked = false;
+        }
+
+        // --- Pinfu / Tanyao Logics ---
+        // Loop through melds to set states based on global modifiers
+        elements.meldGroups.forEach(group => {
+            const id = group.dataset.meldId;
+            const shuntsuRadio = group.querySelector(`#meld${id}-shuntsu`);
+            const koutsuRadio = group.querySelector(`#meld${id}-koutsu`);
+            const isOpenCheck = group.querySelector(`#meld${id}-is-open`);
+            const isYaochuCheck = group.querySelector(`#meld${id}-is-yaochu`);
+
+            // Pinfu forces all melds to be closed shuntsu
+            shuntsuRadio.disabled = isPinfu;
+            koutsuRadio.disabled = isPinfu;
+            isOpenCheck.disabled = isPinfu;
+            if (isPinfu) {
+                shuntsuRadio.checked = true;
+                koutsuRadio.checked = false;
+                isOpenCheck.checked = false;
+            }
+
+            // Tanyao forces melds to not be yaochu
+            isYaochuCheck.disabled = isTanyao;
+            if (isTanyao) {
+                isYaochuCheck.checked = false;
+            }
+        });
+
+        // Pinfu forces a ryanmen wait
+        elements.waitType.disabled = isPinfu;
+        if (isPinfu) {
+            elements.waitType.value = 'ryanmen';
+        }
+
+        // Pair's yakuhai status is disabled by Pinfu OR Tanyao
+        const pairDisabled = isPinfu || isTanyao;
+        elements.pairIsYakuhai.disabled = pairDisabled;
+        if (pairDisabled) {
+            elements.pairIsYakuhai.checked = false;
+        }
+    }
+
 
     // --- 3. Core Calculation Functions ---
     function calculateFu() {
-        // Special case: Chiitoitsu is always 25 fu
-        if (state.chiitoitsu) {
-            elements.fuFieldset.disabled = true;
+        if (state.handType === 'chiitoitsu') {
             return 25;
         }
-        elements.fuFieldset.disabled = false;
 
-        let fu = 20; // Base fu (futei)
-
-        // A hand is Pinfu-shaped if it has no fu from melds, pair, or wait type.
-        let isPinfuShape = true;
-        if (state.wait !== 'ryanmen') isPinfuShape = false;
-        if (state.pair !== 'other') isPinfuShape = false;
-        for (const key in state.melds) {
-            if (state.melds[key] > 0) {
-                isPinfuShape = false;
-                break;
-            }
+        // Pinfu is a special case.
+        // If the Pinfu checkbox is checked, we follow the rules for Pinfu.
+        if (state.isPinfu) {
+            // A menzen (closed) ron Pinfu is 30 fu.
+            // A tsumo Pinfu is 20 fu.
+            return state.isRon ? 30 : 20;
         }
 
-        // Now, calculate fu based on whether it's a Pinfu hand or not.
-        if (isPinfuShape && state.isMenzen) {
-            // It's a Pinfu hand.
-            if (state.isRon) {
-                fu = 30; // 20 base + 10 menzen ron.
-            } else {
-                fu = 20; // Tsumo Pinfu is just 20.
-            }
-        } else {
-            // It's not a Pinfu hand, so calculate fu normally.
-            if (state.isRon && state.isMenzen) {
-                fu += 10;
-            }
-            if (!state.isRon) {
-                fu += 2; // Tsumo fu
-            }
+        // Standard calculation starts with a base of 20 fu.
+        let fu = 20;
 
-            // Wait
-            if (['kanchan', 'penchan', 'tanki', 'shanpon'].includes(state.wait)) {
-                fu += 2;
-            }
-
-            // Pair
-            if (state.pair === 'yakuhai') fu += 2;
-            if (state.pair === 'double-yakuhai') fu += 4;
-
-            // Melds
-            fu += (state.melds['minko-open-simples'] || 0) * 2;
-            fu += (state.melds['anko-simples'] || 0) * 4;
-            fu += (state.melds['minko-open-honors'] || 0) * 4;
-            fu += (state.melds['anko-honors'] || 0) * 8;
-            fu += (state.melds['minkan-open-simples'] || 0) * 8;
-            fu += (state.melds['ankan-simples'] || 0) * 16;
-            fu += (state.melds['minkan-open-honors'] || 0) * 16;
-            fu += (state.melds['ankan-honors'] || 0) * 32;
+        // Add 2 fu for tsumo, unless it's an open hand (kuikae is complex, ignore for now).
+        if (!state.isRon && state.isMenzen) {
+            fu += 2;
         }
+
+        // Add 10 fu for a closed-hand ron.
+        if (state.isRon && state.isMenzen) {
+            fu += 10;
+        }
+
+        // Add fu for the wait type.
+        if (['kanchan', 'penchan', 'tanki'].includes(state.wait)) {
+            fu += 2;
+        }
+        // Shanpon wait gets its fu from the resulting koutsu, so it's not added here.
+
+        // Add fu for the pair.
+        if (state.pair.isYakuhai) {
+            fu += 2; // Assuming single yakuhai, not double for now.
+        }
+
+        // Add fu for melds.
+        state.melds.forEach(meld => {
+            if (meld.type === 'koutsu') {
+                let meldFu = meld.isYaochu ? 8 : 4; // Base for anko (closed triplet)
+                if (meld.isOpen) {
+                    meldFu /= 2; // Half for minko (open triplet)
+                }
+                fu += meldFu;
+            }
+        });
 
         return fu;
     }
 
     function roundUpFu(fu) {
         if (fu === 25) return 25; // Chiitoitsu doesn't round
+        // All other fu totals are rounded up to the nearest 10.
         return Math.ceil(fu / 10) * 10;
     }
 
@@ -138,17 +219,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let pointText;
         if (score.name) { // Yakuman, Mangan etc.
             pointText = `${score.name} (${state.isOya ? score.oya : score.ko}点)`;
-            if (state.isRon) {
-                 pointText = `${score.name} (ロン: ${state.isOya ? score.oya : score.ko}点)`;
-            } else {
-                 pointText = `${score.name} (ツモ: ${state.isOya ? `${score.oya / 3} All` : `${score.ko/2} / ${score.ko/4}` })`;
-                 if(state.isOya) pointText = `${score.name} (ツモ: ${score.oya / 3} All)`;
-                 else {
-                     const oyaPay = Math.ceil((score.ko/2)/100)*100;
-                     const koPay = Math.ceil((score.ko/4)/100)*100;
-                     pointText = `${score.name} (ツモ: ${oyaPay} / ${koPay})`;
-                 }
-            }
         } else { // Regular score
              if (state.isRon) {
                 pointText = `ロン: ${score.ron}点`;
@@ -187,7 +257,6 @@ document.addEventListener('DOMContentLoaded', () => {
         hanHeaders.forEach(han => {
             html += `<tr><th>${han}ハン</th>`;
             fuHeaders.forEach(fu => {
-                // Pinfu tsumo on 1 han is 20 fu, but there is no 1-han 20-fu score.
                 if (han === 1 && fu === 20) {
                      html += `<td id="cell-${han}-${fu}">-</td>`;
                      return;
@@ -197,7 +266,11 @@ document.addEventListener('DOMContentLoaded', () => {
                  if(score.name) {
                     displayScore = state.isOya ? score.oya : score.ko;
                 } else {
-                    displayScore = state.isRon ? score.ron : (state.isOya ? score.raw.tsumo * 3 : score.raw.tsumoOya + score.raw.tsumoKo * 2);
+                    if (state.isRon) {
+                        displayScore = score.ron;
+                    } else { // Tsumo
+                        displayScore = state.isOya ? score.raw.tsumo * 3 : score.raw.tsumoOya + score.raw.tsumoKo * 2;
+                    }
                 }
                 html += `<td id="cell-${han}-${fu}">${displayScore}</td>`;
             });
@@ -217,29 +290,39 @@ document.addEventListener('DOMContentLoaded', () => {
         const score = calculateScore(state.han, roundedFu);
 
         updateDisplay(unroundedFu, roundedFu, score);
-        generateScoreTable(); // Regenerate table to reflect oya/ko/ron/tsumo changes
+        generateScoreTable();
         highlightCell(state.han, roundedFu);
     }
 
     function init() {
-        // More robust way to add listeners, avoiding the .length bug on <select>
-        const singleElements = [
-            'isKo', 'isOya', 'hanInput', 'winRon', 'winTsumo',
-            'isMenzen', 'waitType', 'pairType', 'isPinfuTsumo', 'isChiitoitsu'
+        const controlsToUpdate = [
+            elements.isKo, elements.isOya, elements.hanInput,
+            elements.handTypeStandard, elements.handTypeChiitoitsu,
+            elements.isPinfu, elements.isTanyao,
+            elements.winRon, elements.winTsumo,
+            elements.waitType, elements.pairIsYakuhai
         ];
 
-        singleElements.forEach(key => {
-            // Using both change and input is redundant but safe for all element types.
-            elements[key].addEventListener('change', mainUpdate);
-            elements[key].addEventListener('input', mainUpdate);
+        controlsToUpdate.forEach(control => {
+            control.addEventListener('change', () => {
+                updateControlStates();
+                mainUpdate();
+            });
         });
 
-        // Add listeners to the NodeList of meld inputs separately
-        elements.meldInputs.forEach(input => {
-            input.addEventListener('input', mainUpdate);
+        elements.meldGroups.forEach(group => {
+            const inputs = group.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('change', () => {
+                    updateControlStates();
+                    mainUpdate();
+                });
+            });
         });
 
-        mainUpdate(); // Initial calculation
+        // Initial setup
+        updateControlStates();
+        mainUpdate();
     }
 
     init();

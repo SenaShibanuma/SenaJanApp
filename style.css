@@ -31,12 +31,9 @@ header {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 0 1rem;
-    display: grid;
-    gap: 2rem;
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-        "settings results"
-        "fu-calc  table";
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 /* Card styling */
@@ -48,20 +45,7 @@ header {
     border: 1px solid var(--border-color);
 }
 
-.fu-calculator-card {
-    grid-area: fu-calc;
-}
-
-.settings-card {
-    grid-area: settings;
-}
-
-.results-card {
-    grid-area: results;
-}
-
 .score-table-card {
-    grid-area: table;
     overflow-x: auto; /* For smaller screens if table is wide */
 }
 
@@ -150,6 +134,47 @@ tbody tr:nth-child(even) {
     font-weight: bold;
 }
 
+.hand-composition-card .form-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem; /* row-gap column-gap */
+}
+
+.global-modifiers {
+    margin-bottom: 1.5rem !important;
+}
+
+.melds-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.meld-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid var(--border-color);
+    padding: 0.75rem;
+    border-radius: 4px;
+    flex-wrap: wrap;
+}
+
+.meld-label {
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.meld-options {
+    margin-left: auto;
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+
 footer {
     text-align: center;
     margin-top: 2rem;
@@ -157,14 +182,3 @@ footer {
     color: #777;
 }
 
-/* Responsive layout */
-@media (max-width: 992px) {
-    .container {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "results"
-            "settings"
-            "fu-calc"
-            "table";
-    }
-}
