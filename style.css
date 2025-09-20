@@ -126,38 +126,40 @@ fieldset.disabled {
     border-radius: 6px;
 }
 
-.melds-grid {
-    display: grid;
-    /* Define columns: Label, Type, Options, Fu */
-    grid-template-columns: minmax(60px, auto) 1fr 1fr auto;
-    gap: 0.5rem 1rem;
-    align-items: center;
-    border-top: 1px solid var(--border-color);
+.melds-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
     margin-top: 1rem;
-    padding-top: 1rem;
 }
 
-.grid-header {
-    font-weight: 600;
-    font-size: 0.85rem;
-    color: #555;
-    padding-bottom: 0.5rem;
+.meld-group {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: #fcfcfc;
 }
 
-.type-header, .options-header {
-    text-align: center;
-}
-
-/* Use display: contents to make children direct grid items */
-.meld-group, .pair-group {
-    display: contents;
+.meld-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background-color: #f7f7f7;
+    border-bottom: 1px solid var(--border-color);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
 }
 
 .meld-label, .pair-label {
     font-weight: 600;
     font-size: 0.95rem;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #f0f0f0;
+}
+
+.meld-body {
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 .meld-type, .meld-options, .pair-options {
@@ -165,26 +167,15 @@ fieldset.disabled {
     gap: 0.5rem 1.5rem; /* row-gap, column-gap */
     align-items: center;
     flex-wrap: wrap;
-    justify-content: center; /* Center items within the cell */
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #f0f0f0;
 }
 
-.melds-grid .fu-value-display {
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #f0f0f0;
-    justify-self: center; /* Center the fu value in its column */
-    min-width: 50px; /* Ensure it has some width */
-}
-
-/* Remove bottom border from the last row (pair) */
-.pair-label, .pair-options, .melds-grid .pair-group .fu-value-display {
-    border-bottom: none;
-}
-
-/* Align pair options to span correctly */
 .pair-options {
-    grid-column: 2 / span 2;
+    justify-content: center;
+}
+
+/* Override fu-value-display margin for this context */
+.meld-header .fu-value-display {
+    margin-left: 1rem;
 }
 
 #result-points {
@@ -339,54 +330,4 @@ hr {
     }
 }
 
-@media (max-width: 640px) {
-    .melds-grid {
-        display: block; /* Revert to block layout */
-        border-top: none;
-        margin-top: 0;
-        padding-top: 0;
-    }
-
-    .grid-header {
-        display: none; /* Hide grid headers on small screens */
-    }
-
-    .meld-group, .pair-group {
-        display: flex; /* Revert to flex for a card-like layout */
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 0.5rem 1rem;
-        padding: 0.75rem;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        margin-bottom: 0.75rem;
-    }
-
-    .meld-group:last-of-type {
-        margin-bottom: 0;
-    }
-
-    .meld-label, .pair-label, .meld-type, .meld-options, .pair-options, .melds-grid .fu-value-display {
-        border-bottom: none;
-        padding: 0;
-    }
-
-    .meld-label, .pair-label {
-        width: 100%;
-        margin-bottom: 0.5rem;
-    }
-
-    .meld-type {
-        flex-grow: 1;
-    }
-
-    .melds-grid .fu-value-display {
-        margin-left: auto;
-    }
-
-    .pair-options {
-        grid-column: auto; /* Reset from grid */
-        flex-grow: 1;
-    }
-}
+/* Responsive styles for meld cards are now handled by flexbox wrapping, so the old 640px breakpoint is no longer needed for this section. */
