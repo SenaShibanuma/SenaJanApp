@@ -252,6 +252,12 @@ footer {
     display: inline-block;
 }
 
+.fu-total-result-display {
+    background-color: #fce8e6;
+    color: #c5221f;
+    border-color: #f4c7c3;
+}
+
 .setting-row {
     justify-content: space-between;
     flex-wrap: nowrap;
