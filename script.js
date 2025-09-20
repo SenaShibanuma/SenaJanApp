@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isPinfu: document.getElementById('is-pinfu'),
         isTanyao: document.getElementById('is-tanyao'),
 
-        // Melds
+        // Melds - .meld-group is the class for each <tr> in the melds table
         meldGroups: document.querySelectorAll('.meld-group'),
 
         // Pair
@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (han >= 11) return { name: "三倍満", oya: 36000, ko: 24000 };
         if (han >= 8) return { name: "倍満", oya: 24000, ko: 16000 };
         if (han >= 6) return { name: "跳満", oya: 18000, ko: 12000 };
-        if (han >= 5 || (han === 4 && fu >= 40) || (han === 3 && fu >= 70)) {
+        if (han >= 5 || (han === 4 && fu >= 30) || (han === 3 && fu >= 60)) {
              return { name: "満貫", oya: 12000, ko: 8000 };
         }
 

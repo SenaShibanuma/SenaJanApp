@@ -127,55 +127,85 @@ fieldset.disabled {
 }
 
 .melds-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
     margin-top: 1rem;
 }
 
-.meld-group {
+.melds-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem; /* Space before the pair group */
+}
+
+.melds-table th,
+.melds-table td {
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    padding: 0.5rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.melds-table th {
+    background-color: #f7f7f7;
+    font-size: 0.85rem;
+    padding: 0.5rem;
+}
+
+.melds-table td {
     background-color: #fcfcfc;
 }
 
-.meld-header {
+.melds-table .meld-type {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    padding: 0.5rem 0.75rem;
-    background-color: #f7f7f7;
-    border-bottom: 1px solid var(--border-color);
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
-.meld-label, .pair-label {
+.melds-table label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-weight: normal; /* Labels inside table don't need to be bold */
+}
+
+.melds-table input[type="radio"],
+.melds-table input[type="checkbox"] {
+    transform: scale(1.2);
+    margin: 0;
+}
+
+/* The pair group still uses some of the old styling */
+.pair-group {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: #fcfcfc;
+    padding: 0.75rem;
+}
+
+.pair-group .meld-header {
+     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.5rem;
+}
+
+.pair-group .pair-label {
     font-weight: 600;
     font-size: 0.95rem;
 }
 
-.meld-body {
-    padding: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+.pair-group .meld-body {
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-color);
 }
 
-.meld-type, .meld-options, .pair-options {
+.pair-group .pair-options {
     display: flex;
-    gap: 0.5rem 1.5rem; /* row-gap, column-gap */
+    gap: 1.5rem;
     align-items: center;
-    flex-wrap: wrap;
-}
-
-.pair-options {
     justify-content: center;
-}
-
-/* Override fu-value-display margin for this context */
-.meld-header .fu-value-display {
-    margin-left: 1rem;
+    flex-wrap: wrap;
 }
 
 #result-points {

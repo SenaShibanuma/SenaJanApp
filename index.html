@@ -49,81 +49,86 @@
                     </div>
 
                     <div class="melds-container">
-                        <!-- Meld 1 -->
-                        <div class="meld-group" data-meld-id="1">
-                            <div class="meld-header">
-                                <span class="meld-label">面子1</span>
-                                <span class="fu-value-display" id="meld1-fu-value"></span>
-                            </div>
-                            <div class="meld-body">
-                                <div class="meld-type">
-                                    <input type="radio" id="meld1-shuntsu" name="meld1-type" value="shuntsu" checked> <label for="meld1-shuntsu">順子</label>
-                                    <input type="radio" id="meld1-koutsu" name="meld1-type" value="koutsu"> <label for="meld1-koutsu">刻子</label>
-                                    <input type="radio" id="meld1-kantsu" name="meld1-type" value="kantsu"> <label for="meld1-kantsu">槓子</label>
-                                </div>
-                                <div class="meld-options">
-                                    <input type="checkbox" id="meld1-is-open"> <label for="meld1-is-open">鳴き</label>
-                                    <input type="checkbox" id="meld1-is-yaochu"> <label for="meld1-is-yaochu">幺九牌</label>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Meld 2 -->
-                        <div class="meld-group" data-meld-id="2">
-                           <div class="meld-header">
-                                <span class="meld-label">面子2</span>
-                                <span class="fu-value-display" id="meld2-fu-value"></span>
-                            </div>
-                            <div class="meld-body">
-                                <div class="meld-type">
-                                   <input type="radio" id="meld2-shuntsu" name="meld2-type" value="shuntsu" checked> <label for="meld2-shuntsu">順子</label>
-                                   <input type="radio" id="meld2-koutsu" name="meld2-type" value="koutsu"> <label for="meld2-koutsu">刻子</label>
-                                   <input type="radio" id="meld2-kantsu" name="meld2-type" value="kantsu"> <label for="meld2-kantsu">槓子</label>
-                                </div>
-                                <div class="meld-options">
-                                   <input type="checkbox" id="meld2-is-open"> <label for="meld2-is-open">鳴き</label>
-                                   <input type="checkbox" id="meld2-is-yaochu"> <label for="meld2-is-yaochu">幺九牌</label>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Meld 3 -->
-                        <div class="meld-group" data-meld-id="3">
-                            <div class="meld-header">
-                                <span class="meld-label">面子3</span>
-                                <span class="fu-value-display" id="meld3-fu-value"></span>
-                            </div>
-                            <div class="meld-body">
-                                <div class="meld-type">
-                                   <input type="radio" id="meld3-shuntsu" name="meld3-type" value="shuntsu" checked> <label for="meld3-shuntsu">順子</label>
-                                   <input type="radio" id="meld3-koutsu" name="meld3-type" value="koutsu"> <label for="meld3-koutsu">刻子</label>
-                                   <input type="radio" id="meld3-kantsu" name="meld3-type" value="kantsu"> <label for="meld3-kantsu">槓子</label>
-                                </div>
-                                <div class="meld-options">
-                                   <input type="checkbox" id="meld3-is-open"> <label for="meld3-is-open">鳴き</label>
-                                   <input type="checkbox" id="meld3-is-yaochu"> <label for="meld3-is-yaochu">幺九牌</label>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Meld 4 -->
-                        <div class="meld-group" data-meld-id="4">
-                            <div class="meld-header">
-                                <span class="meld-label">面子4</span>
-                                <span class="fu-value-display" id="meld4-fu-value"></span>
-                            </div>
-                            <div class="meld-body">
-                                <div class="meld-type">
-                                   <input type="radio" id="meld4-shuntsu" name="meld4-type" value="shuntsu" checked> <label for="meld4-shuntsu">順子</label>
-                                   <input type="radio" id="meld4-koutsu" name="meld4-type" value="koutsu"> <label for="meld4-koutsu">刻子</label>
-                                   <input type="radio" id="meld4-kantsu" name="meld4-type" value="kantsu"> <label for="meld4-kantsu">槓子</label>
-                                </div>
-                                <div class="meld-options">
-                                   <input type="checkbox" id="meld4-is-open"> <label for="meld4-is-open">鳴き</label>
-                                   <input type="checkbox" id="meld4-is-yaochu"> <label for="meld4-is-yaochu">幺九牌</label>
-                                </div>
-                            </div>
-                        </div>
+                        <table class="melds-table">
+                            <thead>
+                                <tr>
+                                    <th>面子</th>
+                                    <th>種類</th>
+                                    <th>鳴き</th>
+                                    <th>幺九牌</th>
+                                    <th>符</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Meld 1 -->
+                                <tr class="meld-group" data-meld-id="1">
+                                    <td>面子1</td>
+                                    <td class="meld-type">
+                                        <label><input type="radio" id="meld1-shuntsu" name="meld1-type" value="shuntsu" checked> 順子</label>
+                                        <label><input type="radio" id="meld1-koutsu" name="meld1-type" value="koutsu"> 刻子</label>
+                                        <label><input type="radio" id="meld1-kantsu" name="meld1-type" value="kantsu"> 槓子</label>
+                                    </td>
+                                    <td class="meld-options">
+                                        <label><input type="checkbox" id="meld1-is-open"> 鳴き</label>
+                                    </td>
+                                    <td class="meld-options">
+                                        <label><input type="checkbox" id="meld1-is-yaochu"> 幺九牌</label>
+                                    </td>
+                                    <td><span class="fu-value-display" id="meld1-fu-value"></span></td>
+                                </tr>
+                                <!-- Meld 2 -->
+                                <tr class="meld-group" data-meld-id="2">
+                                    <td>面子2</td>
+                                    <td class="meld-type">
+                                        <label><input type="radio" id="meld2-shuntsu" name="meld2-type" value="shuntsu" checked> 順子</label>
+                                        <label><input type="radio" id="meld2-koutsu" name="meld2-type" value="koutsu"> 刻子</label>
+                                        <label><input type="radio" id="meld2-kantsu" name="meld2-type" value="kantsu"> 槓子</label>
+                                    </td>
+                                    <td class="meld-options">
+                                        <label><input type="checkbox" id="meld2-is-open"> 鳴き</label>
+                                    </td>
+                                    <td class="meld-options">
+                                        <label><input type="checkbox" id="meld2-is-yaochu"> 幺九牌</label>
+                                    </td>
+                                    <td><span class="fu-value-display" id="meld2-fu-value"></span></td>
+                                </tr>
+                                <!-- Meld 3 -->
+                                <tr class="meld-group" data-meld-id="3">
+                                    <td>面子3</td>
+                                    <td class="meld-type">
+                                        <label><input type="radio" id="meld3-shuntsu" name="meld3-type" value="shuntsu" checked> 順子</label>
+                                        <label><input type="radio" id="meld3-koutsu" name="meld3-type" value="koutsu"> 刻子</label>
+                                        <label><input type="radio" id="meld3-kantsu" name="meld3-type" value="kantsu"> 槓子</label>
+                                    </td>
+                                    <td class="meld-options">
+                                        <label><input type="checkbox" id="meld3-is-open"> 鳴き</label>
+                                    </td>
+                                    <td class="meld-options">
+                                        <label><input type="checkbox" id="meld3-is-yaochu"> 幺九牌</label>
+                                    </td>
+                                    <td><span class="fu-value-display" id="meld3-fu-value"></span></td>
+                                </tr>
+                                <!-- Meld 4 -->
+                                <tr class="meld-group" data-meld-id="4">
+                                    <td>面子4</td>
+                                    <td class="meld-type">
+                                        <label><input type="radio" id="meld4-shuntsu" name="meld4-type" value="shuntsu" checked> 順子</label>
+                                        <label><input type="radio" id="meld4-koutsu" name="meld4-type" value="koutsu"> 刻子</label>
+                                        <label><input type="radio" id="meld4-kantsu" name="meld4-type" value="kantsu"> 槓子</label>
+                                    </td>
+                                    <td class="meld-options">
+                                        <label><input type="checkbox" id="meld4-is-open"> 鳴き</label>
+                                    </td>
+                                    <td class="meld-options">
+                                        <label><input type="checkbox" id="meld4-is-yaochu"> 幺九牌</label>
+                                    </td>
+                                    <td><span class="fu-value-display" id="meld4-fu-value"></span></td>
+                                </tr>
+                            </tbody>
+                        </table>
 
                         <!-- Pair -->
-                        <div class="pair-group meld-group">
+                        <div class="pair-group">
                             <div class="meld-header">
                                 <span class="pair-label">雀頭</span>
                                 <span class="fu-value-display" id="pair-fu-value"></span>
