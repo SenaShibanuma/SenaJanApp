@@ -13,133 +13,185 @@
     </header>
 
     <main class="container">
-        <section class="card">
-            <h2>基本設定</h2>
-            <div class="form-group">
-                <label>親/子:</label>
-                <input type="radio" id="is-ko" name="player-type" value="ko" checked>
-                <label for="is-ko">子</label>
-                <input type="radio" id="is-oya" name="player-type" value="oya">
-                <label for="is-oya">親</label>
-            </div>
-            <div class="form-group">
-                <label for="han-input">ハン数:</label>
-                <input type="number" id="han-input" min="1" value="1">
-            </div>
-        </section>
+        <div class="input-area">
+            <section class="card">
+                <h2>基本設定</h2>
+                <div class="form-group">
+                    <label>親/子:</label>
+                    <input type="radio" id="is-ko" name="player-type" value="ko" checked>
+                    <label for="is-ko">子</label>
+                    <input type="radio" id="is-oya" name="player-type" value="oya">
+                    <label for="is-oya">親</label>
+                </div>
+                <div class="form-group">
+                    <label for="han-input">ハン数:</label>
+                    <input type="number" id="han-input" min="1" value="1">
+                </div>
+            </section>
 
-        <section class="card">
-            <h2>手牌の構成</h2>
+            <section class="card">
+                <h2>手牌の構成</h2>
 
-            <div class="form-group">
-                <input type="checkbox" id="is-chiitoitsu">
-                <label for="is-chiitoitsu">七対子 (チートイツ)</label>
-            </div>
-
-            <fieldset id="standard-hand-fieldset">
-                <div class="form-group global-modifiers">
-                    <input type="checkbox" id="is-tanyao">
-                    <label for="is-tanyao">断幺九 (タンヤオ)</label>
-                    <input type="checkbox" id="is-pinfu">
-                    <label for="is-pinfu">平和 (ピンフ)</label>
+                <div class="form-group">
+                    <input type="checkbox" id="is-chiitoitsu">
+                    <label for="is-chiitoitsu">七対子 (チートイツ)</label>
                 </div>
 
-                <div class="melds-container">
-                    <!-- 面子1 -->
-                    <div class="meld-group" data-meld-id="1">
-                        <span class="meld-label">面子1</span>
-                        <div class="meld-type">
-                            <input type="radio" id="meld1-shuntsu" name="meld1-type" value="shuntsu" checked> <label for="meld1-shuntsu">順子</label>
-                            <input type="radio" id="meld1-koutsu" name="meld1-type" value="koutsu"> <label for="meld1-koutsu">刻子</label>
-                            <input type="radio" id="meld1-kantsu" name="meld1-type" value="kantsu"> <label for="meld1-kantsu">槓子</label>
+                <fieldset id="standard-hand-fieldset">
+                    <div class="form-group global-modifiers">
+                        <input type="checkbox" id="is-tanyao">
+                        <label for="is-tanyao">断幺九 (タンヤオ)</label>
+                        <input type="checkbox" id="is-pinfu">
+                        <label for="is-pinfu">平和 (ピンフ)</label>
+                    </div>
+
+                    <div class="melds-container">
+                        <!-- 面子1 -->
+                        <div class="meld-group" data-meld-id="1">
+                            <span class="meld-label">面子1</span>
+                            <div class="meld-type">
+                                <input type="radio" id="meld1-shuntsu" name="meld1-type" value="shuntsu" checked> <label for="meld1-shuntsu">順子</label>
+                                <input type="radio" id="meld1-koutsu" name="meld1-type" value="koutsu"> <label for="meld1-koutsu">刻子</label>
+                                <input type="radio" id="meld1-kantsu" name="meld1-type" value="kantsu"> <label for="meld1-kantsu">槓子</label>
+                            </div>
+                            <div class="meld-options">
+                                <input type="checkbox" id="meld1-is-open"> <label for="meld1-is-open">鳴き</label>
+                                <input type="checkbox" id="meld1-is-yaochu"> <label for="meld1-is-yaochu">幺九牌</label>
+                            </div>
                         </div>
-                        <div class="meld-options">
-                            <input type="checkbox" id="meld1-is-open"> <label for="meld1-is-open">鳴き</label>
-                            <input type="checkbox" id="meld1-is-yaochu"> <label for="meld1-is-yaochu">幺九牌</label>
+                        <!-- 面子2 -->
+                        <div class="meld-group" data-meld-id="2">
+                            <span class="meld-label">面子2</span>
+                            <div class="meld-type">
+                               <input type="radio" id="meld2-shuntsu" name="meld2-type" value="shuntsu" checked> <label for="meld2-shuntsu">順子</label>
+                               <input type="radio" id="meld2-koutsu" name="meld2-type" value="koutsu"> <label for="meld2-koutsu">刻子</label>
+                               <input type="radio" id="meld2-kantsu" name="meld2-type" value="kantsu"> <label for="meld2-kantsu">槓子</label>
+                            </div>
+                            <div class="meld-options">
+                               <input type="checkbox" id="meld2-is-open"> <label for="meld2-is-open">鳴き</label>
+                               <input type="checkbox" id="meld2-is-yaochu"> <label for="meld2-is-yaochu">幺九牌</label>
+                            </div>
+                        </div>
+                        <!-- 面子3 -->
+                        <div class="meld-group" data-meld-id="3">
+                            <span class="meld-label">面子3</span>
+                            <div class="meld-type">
+                               <input type="radio" id="meld3-shuntsu" name="meld3-type" value="shuntsu" checked> <label for="meld3-shuntsu">順子</label>
+                               <input type="radio" id="meld3-koutsu" name="meld3-type" value="koutsu"> <label for="meld3-koutsu">刻子</label>
+                               <input type="radio" id="meld3-kantsu" name="meld3-type" value="kantsu"> <label for="meld3-kantsu">槓子</label>
+                            </div>
+                            <div class="meld-options">
+                               <input type="checkbox" id="meld3-is-open"> <label for="meld3-is-open">鳴き</label>
+                               <input type="checkbox" id="meld3-is-yaochu"> <label for="meld3-is-yaochu">幺九牌</label>
+                            </div>
+                        </div>
+                        <!-- 面子4 -->
+                        <div class="meld-group" data-meld-id="4">
+                            <span class="meld-label">面子4</span>
+                            <div class="meld-type">
+                               <input type="radio" id="meld4-shuntsu" name="meld4-type" value="shuntsu" checked> <label for="meld4-shuntsu">順子</label>
+                               <input type="radio" id="meld4-koutsu" name="meld4-type" value="koutsu"> <label for="meld4-koutsu">刻子</label>
+                               <input type="radio" id="meld4-kantsu" name="meld4-type" value="kantsu"> <label for="meld4-kantsu">槓子</label>
+                            </div>
+                            <div class="meld-options">
+                               <input type="checkbox" id="meld4-is-open"> <label for="meld4-is-open">鳴き</label>
+                               <input type="checkbox" id="meld4-is-yaochu"> <label for="meld4-is-yaochu">幺九牌</label>
+                            </div>
                         </div>
                     </div>
-                    <!-- 面子2 -->
-                    <div class="meld-group" data-meld-id="2">
-                        <span class="meld-label">面子2</span>
-                        <div class="meld-type">
-                           <input type="radio" id="meld2-shuntsu" name="meld2-type" value="shuntsu" checked> <label for="meld2-shuntsu">順子</label>
-                           <input type="radio" id="meld2-koutsu" name="meld2-type" value="koutsu"> <label for="meld2-koutsu">刻子</label>
-                           <input type="radio" id="meld2-kantsu" name="meld2-type" value="kantsu"> <label for="meld2-kantsu">槓子</label>
-                        </div>
-                        <div class="meld-options">
-                           <input type="checkbox" id="meld2-is-open"> <label for="meld2-is-open">鳴き</label>
-                           <input type="checkbox" id="meld2-is-yaochu"> <label for="meld2-is-yaochu">幺九牌</label>
+
+                    <!-- 雀頭 -->
+                    <div class="pair-group">
+                        <span class="pair-label">雀頭</span>
+                        <div class="pair-options">
+                            <input type="checkbox" id="pair-is-yakuhai"> <label for="pair-is-yakuhai">役牌</label>
                         </div>
                     </div>
-                    <!-- 面子3 -->
-                    <div class="meld-group" data-meld-id="3">
-                        <span class="meld-label">面子3</span>
-                        <div class="meld-type">
-                           <input type="radio" id="meld3-shuntsu" name="meld3-type" value="shuntsu" checked> <label for="meld3-shuntsu">順子</label>
-                           <input type="radio" id="meld3-koutsu" name="meld3-type" value="koutsu"> <label for="meld3-koutsu">刻子</label>
-                           <input type="radio" id="meld3-kantsu" name="meld3-type" value="kantsu"> <label for="meld3-kantsu">槓子</label>
-                        </div>
-                        <div class="meld-options">
-                           <input type="checkbox" id="meld3-is-open"> <label for="meld3-is-open">鳴き</label>
-                           <input type="checkbox" id="meld3-is-yaochu"> <label for="meld3-is-yaochu">幺九牌</label>
-                        </div>
-                    </div>
-                    <!-- 面子4 -->
-                    <div class="meld-group" data-meld-id="4">
-                        <span class="meld-label">面子4</span>
-                        <div class="meld-type">
-                           <input type="radio" id="meld4-shuntsu" name="meld4-type" value="shuntsu" checked> <label for="meld4-shuntsu">順子</label>
-                           <input type="radio" id="meld4-koutsu" name="meld4-type" value="koutsu"> <label for="meld4-koutsu">刻子</label>
-                           <input type="radio" id="meld4-kantsu" name="meld4-type" value="kantsu"> <label for="meld4-kantsu">槓子</label>
-                        </div>
-                        <div class="meld-options">
-                           <input type="checkbox" id="meld4-is-open"> <label for="meld4-is-open">鳴き</label>
-                           <input type="checkbox" id="meld4-is-yaochu"> <label for="meld4-is-yaochu">幺九牌</label>
-                        </div>
-                    </div>
+                </fieldset>
+            </section>
+
+            <section class="card">
+                <h2>詳細設定</h2>
+                <div class="form-group">
+                    <label>待ち方:</label>
+                    <select id="wait-type">
+                        <option value="ryanmen">両面待ち</option>
+                        <option value="kanchan">カンチャン待ち</option>
+                        <option value="penchan">ペンチャン待ち</option>
+                        <option value="shanpon">シャンポン待ち</option>
+                        <option value="tanki">単騎待ち</option>
+                    </select>
                 </div>
-
-                <!-- 雀頭 -->
-                <div class="pair-group">
-                    <span class="pair-label">雀頭</span>
-                    <div class="pair-options">
-                        <input type="checkbox" id="pair-is-yakuhai"> <label for="pair-is-yakuhai">役牌</label>
-                    </div>
+                <div class="form-group">
+                    <label>和了り方:</label>
+                    <input type="radio" id="win-ron" name="win-method" value="ron" checked> <label for="win-ron">ロン</label>
+                    <input type="radio" id="win-tsumo" name="win-method" value="tsumo"> <label for="win-tsumo">ツモ</label>
                 </div>
-            </fieldset>
-        </section>
+            </section>
 
-        <section class="card">
-            <h2>詳細設定</h2>
-            <div class="form-group">
-                <label>待ち方:</label>
-                <select id="wait-type">
-                    <option value="ryanmen">両面待ち</option>
-                    <option value="kanchan">カンチャン待ち</option>
-                    <option value="penchan">ペンチャン待ち</option>
-                    <option value="shanpon">シャンポン待ち</option>
-                    <option value="tanki">単騎待ち</option>
-                </select>
+            <section class="card">
+                <h2>計算結果</h2>
+                <p>この手は: <strong id="result-han-fu">--ハン --符</strong> です。</p>
+                <p>点数: <strong id="result-points">----点</strong></p>
+            </section>
+
+            <section class="card">
+                <h2>点数表</h2>
+                <table id="score-table">
+                    <!-- JS will generate this -->
+                </table>
+            </section>
+        </div>
+        <div class="fu-breakdown-area card">
+            <h2>符の内訳</h2>
+            <div id="fu-breakdown-content">
+                <div class="fu-row" id="fu-base-row">
+                    <span class="fu-label">符底 (フーテイ)</span>
+                    <span class="fu-value" id="fu-base">20</span>
+                </div>
+                <div class="fu-row" id="fu-win-method-row">
+                    <span class="fu-label">和了り方</span>
+                    <span class="fu-value" id="fu-win-method">0</span>
+                </div>
+                <div class="fu-row fu-meld-row" id="fu-meld1-row">
+                    <span class="fu-label">面子1</span>
+                    <span class="fu-value" id="fu-meld1">0</span>
+                </div>
+                <div class="fu-row fu-meld-row" id="fu-meld2-row">
+                    <span class="fu-label">面子2</span>
+                    <span class="fu-value" id="fu-meld2">0</span>
+                </div>
+                <div class="fu-row fu-meld-row" id="fu-meld3-row">
+                    <span class="fu-label">面子3</span>
+                    <span class="fu-value" id="fu-meld3">0</span>
+                </div>
+                <div class="fu-row fu-meld-row" id="fu-meld4-row">
+                    <span class="fu-label">面子4</span>
+                    <span class="fu-value" id="fu-meld4">0</span>
+                </div>
+                <div class="fu-row" id="fu-pair-row">
+                    <span class="fu-label">雀頭</span>
+                    <span class="fu-value" id="fu-pair">0</span>
+                </div>
+                <div class="fu-row" id="fu-wait-row">
+                    <span class="fu-label">待ち方</span>
+                    <span class="fu-value" id="fu-wait">0</span>
+                </div>
             </div>
-            <div class="form-group">
-                <label>和了り方:</label>
-                <input type="radio" id="win-ron" name="win-method" value="ron" checked> <label for="win-ron">ロン</label>
-                <input type="radio" id="win-tsumo" name="win-method" value="tsumo"> <label for="win-tsumo">ツモ</label>
+             <div id="fu-special-content" style="display: none;">
+                <!-- JS will populate this for Chiitoitsu/Pinfu -->
             </div>
-        </section>
-
-        <section class="card">
-            <h2>計算結果</h2>
-            <p>この手は: <strong id="result-han-fu">--ハン --符</strong> です。</p>
-            <p>点数: <strong id="result-points">----点</strong></p>
-        </section>
-
-        <section class="card">
-            <h2>点数表</h2>
-            <table id="score-table">
-                <!-- JS will generate this -->
-            </table>
-        </section>
+            <hr>
+            <div class="fu-total-row">
+                <span class="fu-label">合計 (切り上げ前)</span>
+                <span class="fu-value" id="fu-total-unrounded">20</span>
+            </div>
+            <div class="fu-total-arrow">↓</div>
+            <div class="fu-total-row">
+                <span class="fu-label">合計 (切り上げ後)</span>
+                <span class="fu-value" id="fu-total-rounded">20</span>
+            </div>
+        </div>
     </main>
 
     <footer>
