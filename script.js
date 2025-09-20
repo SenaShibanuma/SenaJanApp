@@ -44,7 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
         fuPair: document.getElementById('fu-pair'),
         fuWait: document.getElementById('fu-wait'),
         fuTotalUnrounded: document.getElementById('fu-total-unrounded'),
-        fuTotalRounded: document.getElementById('fu-total-rounded')
+        fuTotalRounded: document.getElementById('fu-total-rounded'),
+
+        // New Fu Value Displays
+        winMethodFuValue: document.getElementById('win-method-fu-value'),
+        waitFuValue: document.getElementById('wait-fu-value'),
+        pairFuValue: document.getElementById('pair-fu-value'),
+        meld1FuValue: document.getElementById('meld1-fu-value'),
+        meld2FuValue: document.getElementById('meld2-fu-value'),
+        meld3FuValue: document.getElementById('meld3-fu-value'),
+        meld4FuValue: document.getElementById('meld4-fu-value')
     };
 
 
@@ -265,6 +274,39 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateFuBreakdownUI(fuBreakdown) {
         const { base, melds, pair, wait, winMethod, special, unrounded, rounded } = fuBreakdown;
 
+        // Helper to update the new display elements
+        const updateFuDisplay = (element, value) => {
+            if (value > 0) {
+                element.textContent = value;
+                element.classList.add('visible');
+            } else {
+                element.classList.remove('visible');
+            }
+        };
+
+        if (special) {
+            // Hide all individual fu displays for special hands like Chiitoitsu
+            updateFuDisplay(elements.winMethodFuValue, 0);
+            updateFuDisplay(elements.waitFuValue, 0);
+            updateFuDisplay(elements.pairFuValue, 0);
+            updateFuDisplay(elements.meld1FuValue, 0);
+            updateFuDisplay(elements.meld2FuValue, 0);
+            updateFuDisplay(elements.meld3FuValue, 0);
+            updateFuDisplay(elements.meld4FuValue, 0);
+        } else {
+            // Update individual fu displays for standard hands
+            updateFuDisplay(elements.winMethodFuValue, winMethod);
+            updateFuDisplay(elements.waitFuValue, wait);
+            updateFuDisplay(elements.pairFuValue, pair);
+            melds.forEach((meldFu, index) => {
+                const meldElement = elements[`meld${index + 1}FuValue`];
+                if (meldElement) {
+                    updateFuDisplay(meldElement, meldFu);
+                }
+            });
+        }
+
+        // --- Keep old logic for the hidden panel to minimize risk ---
         if (special) {
             elements.fuBreakdownContent.style.display = 'none';
             elements.fuSpecialContent.style.display = 'block';
