@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>麻雀 点数計算アプリ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>麻雀 点数計算アプリ</h1>
+    </header>
+
+    <main class="container">
+        <section class="settings-card">
+            <h2>基本設定</h2>
+            <div class="form-group">
+                <label>親/子:</label>
+                <input type="radio" id="is-ko" name="player-type" value="ko" checked>
+                <label for="is-ko">子</label>
+                <input type="radio" id="is-oya" name="player-type" value="oya">
+                <label for="is-oya">親</label>
+            </div>
+            <div class="form-group">
+                <label for="han-input">ハン数:</label>
+                <input type="number" id="han-input" min="1" value="1">
+            </div>
+        </section>
+
+        <section class="fu-calculator-card">
+            <h2>符計算</h2>
+            <fieldset id="fu-fieldset">
+                <legend>符の要素をチェックしてください</legend>
+
+                <!-- Winning Style -->
+                <div class="form-group fu-item">
+                    <label>和了り方:</label>
+                    <input type="radio" id="win-ron" name="win-method" value="ron" checked> <label for="win-ron">ロン</label>
+                    <input type="radio" id="win-tsumo" name="win-method" value="tsumo"> <label for="win-tsumo">ツモ</label>
+                </div>
+                <div class="form-group fu-item">
+                    <input type="checkbox" id="is-menzen" checked> <label for="is-menzen">門前 (メンゼン)</label>
+                </div>
+
+                <!-- Waits -->
+                <div class="form-group fu-item">
+                    <label>待ち方:</label>
+                    <select id="wait-type">
+                        <option value="ryanmen">両面待ち (0符)</option>
+                        <option value="kanchan">カンチャン待ち (2符)</option>
+                        <option value="penchan">ペンチャン待ち (2符)</option>
+                        <option value="shanpon">シャンポン待ち (2符)</option>
+                        <option value="tanki">単騎待ち (2符)</option>
+                    </select>
+                </div>
+
+                <!-- Pair -->
+                <div class="form-group fu-item">
+                    <label>雀頭 (アタマ):</label>
+                    <select id="pair-type">
+                        <option value="other">その他 (0符)</option>
+                        <option value="yakuhai">役牌 (2符)</option>
+                        <option value="double-yakuhai">連風牌 (4符)</option>
+                    </select>
+                </div>
+
+                <!-- Melds (Mentsu) -->
+                <div class="form-group fu-item">
+                    <label>面子 (メンツ):</label>
+                    <table>
+                        <tr>
+                            <th>種類</th>
+                            <th>明 (ミン)</th>
+                            <th>暗 (アン)</th>
+                        </tr>
+                        <tr>
+                            <td>中張牌・刻子</td>
+                            <td><input type="number" class="meld-input" id="minko-open-simples" min="0" value="0"> (2符)</td>
+                            <td><input type="number" class="meld-input" id="anko-simples" min="0" value="0"> (4符)</td>
+                        </tr>
+                        <tr>
+                            <td>么九牌・刻子</td>
+                            <td><input type="number" class="meld-input" id="minko-open-honors" min="0" value="0"> (4符)</td>
+                            <td><input type="number" class="meld-input" id="anko-honors" min="0" value="0"> (8符)</td>
+                        </tr>
+                        <tr>
+                            <td>中張牌・槓子</td>
+                            <td><input type="number" class="meld-input" id="minkan-open-simples" min="0" value="0"> (8符)</td>
+                            <td><input type="number" class="meld-input" id="ankan-simples" min="0" value="0"> (16符)</td>
+                        </tr>
+                        <tr>
+                            <td>么九牌・槓子</td>
+                            <td><input type="number" class="meld-input" id="minkan-open-honors" min="0" value="0"> (16符)</td>
+                            <td><input type="number" class="meld-input" id="ankan-honors" min="0" value="0"> (32符)</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Special Cases -->
+                <div class="form-group fu-item">
+                    <input type="checkbox" id="is-pinfu-tsumo"> <label for="is-pinfu-tsumo">ツモ平和 (ピンフツモ) (2符)</label>
+                </div>
+                 <div class="form-group fu-item">
+                    <input type="checkbox" id="is-chiitoitsu"> <label for="is-chiitoitsu">七対子 (チートイツ) (25符)</label>
+                </div>
+
+            </fieldset>
+        </section>
+
+        <section class="results-card">
+            <h2>計算結果</h2>
+            <p>この手は: <strong id="result-han-fu">--ハン --符</strong> です。</p>
+            <p>点数: <strong id="result-points">----点</strong></p>
+        </section>
+
+        <section class="score-table-card">
+            <h2>点数表</h2>
+            <table id="score-table">
+                <!-- JS will generate this -->
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>Built by Jules the Pirate Engineer 🏴‍☠️</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
