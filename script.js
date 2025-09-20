@@ -30,7 +30,21 @@ document.addEventListener('DOMContentLoaded', () => {
         // Results
         resultHanFu: document.getElementById('result-han-fu'),
         resultPoints: document.getElementById('result-points'),
-        scoreTable: document.getElementById('score-table')
+        scoreTable: document.getElementById('score-table'),
+
+        // Fu Breakdown
+        fuBreakdownContent: document.getElementById('fu-breakdown-content'),
+        fuSpecialContent: document.getElementById('fu-special-content'),
+        fuBase: document.getElementById('fu-base'),
+        fuWinMethod: document.getElementById('fu-win-method'),
+        fuMeld1: document.getElementById('fu-meld1'),
+        fuMeld2: document.getElementById('fu-meld2'),
+        fuMeld3: document.getElementById('fu-meld3'),
+        fuMeld4: document.getElementById('fu-meld4'),
+        fuPair: document.getElementById('fu-pair'),
+        fuWait: document.getElementById('fu-wait'),
+        fuTotalUnrounded: document.getElementById('fu-total-unrounded'),
+        fuTotalRounded: document.getElementById('fu-total-rounded')
     };
 
 
@@ -130,65 +144,78 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- 3. Core Calculation Functions (Largely unchanged, but state dependency is key) ---
+    // --- 3. Core Calculation Functions ---
     function calculateFu() {
+        const fuBreakdown = {
+            base: 0,
+            melds: [0, 0, 0, 0],
+            pair: 0,
+            wait: 0,
+            winMethod: 0,
+            special: null, // To store text for special cases like "Chiitoitsu"
+            unrounded: 0,
+            rounded: 0
+        };
+
         if (state.handType === 'chiitoitsu') {
-            return 25;
+            fuBreakdown.special = '七対子';
+            fuBreakdown.unrounded = 25;
+            fuBreakdown.rounded = 25;
+            return fuBreakdown;
         }
 
-        // For a Tsumo win, if Pinfu is checked, the fu is fixed at 20.
-        // For a Ron win, Pinfu is not possible, so we proceed with normal fu calculation.
-        // The UI logic already prevents selecting Pinfu with incompatible options.
+        // Tsumo Pinfu is a special case, fixed at 20 fu.
         if (state.isPinfu && !state.isRon) {
-            return 20; // Tsumo Pinfu is always 20 fu.
+            fuBreakdown.special = '平和ツモ';
+            fuBreakdown.base = 20;
+            fuBreakdown.unrounded = 20;
+            fuBreakdown.rounded = 20;
+            return fuBreakdown;
         }
 
-        let fu = 20; // Base fu (futei)
+        let fu = 20;
+        fuBreakdown.base = 20;
 
         // Win condition fu
         if (state.isMenzen && state.isRon) {
-            fu += 10; // Menzen Ron bonus
+            fuBreakdown.winMethod = 10;
+            fu += 10;
         }
-        if (!state.isRon) { // Tsumo win
-            // Exception: Tsumo Pinfu gives 0 fu for the tsumo part, which is handled above.
-            if (!state.isPinfu) {
-                 fu += 2;
-            }
+        if (!state.isRon && !state.isPinfu) { // Tsumo win (but not for Pinfu)
+            fuBreakdown.winMethod = 2;
+            fu += 2;
         }
 
         // Wait type fu
         if (['kanchan', 'penchan', 'tanki'].includes(state.wait)) {
+            fuBreakdown.wait = 2;
             fu += 2;
         }
 
         // Pair fu
         if (state.pair.isYakuhai) {
+            fuBreakdown.pair = 2;
             fu += 2;
         }
 
         // Meld fu
-        state.melds.forEach(meld => {
+        state.melds.forEach((meld, index) => {
             let meldFu = 0;
             if (meld.type === 'koutsu') { // Triplets
-                meldFu = meld.isYaochu ? 8 : 4; // Base for closed triplet (Anko)
-                if (meld.isOpen) {
-                    meldFu /= 2; // Half for open triplet (Minko)
-                }
+                meldFu = meld.isYaochu ? 8 : 4;
+                if (meld.isOpen) meldFu /= 2;
             } else if (meld.type === 'kantsu') { // Quads
-                meldFu = meld.isYaochu ? 32 : 16; // Base for closed quad (Ankan)
-                if (meld.isOpen) {
-                    meldFu /= 2; // Half for open quad (Daiminkan/Shouminkan)
-                }
+                meldFu = meld.isYaochu ? 32 : 16;
+                if (meld.isOpen) meldFu /= 2;
             }
+            fuBreakdown.melds[index] = meldFu;
             fu += meldFu;
         });
 
-        return fu;
-    }
+        fuBreakdown.unrounded = fu;
+        fuBreakdown.rounded = (fu === 25) ? 25 : Math.ceil(fu / 10) * 10;
 
-    function roundUpFu(fu) {
-        if (fu === 25) return 25;
-        return Math.ceil(fu / 10) * 10;
+        return fuBreakdown;
     }
 
     function calculateScore(han, fu) {
@@ -219,8 +246,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 4. DOM Update Functions ---
-    function updateDisplay(fu, roundedFu, score) {
-        elements.resultHanFu.textContent = `${state.han}ハン ${roundedFu}符`;
+    function updateDisplay(fuBreakdown, score) {
+        elements.resultHanFu.textContent = `${state.han}ハン ${fuBreakdown.rounded}符`;
 
         let pointText;
         if (score.name) {
@@ -234,6 +261,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         elements.resultPoints.textContent = pointText;
     }
+
+    function updateFuBreakdownUI(fuBreakdown) {
+        const { base, melds, pair, wait, winMethod, special, unrounded, rounded } = fuBreakdown;
+
+        if (special) {
+            elements.fuBreakdownContent.style.display = 'none';
+            elements.fuSpecialContent.style.display = 'block';
+            elements.fuSpecialContent.innerHTML = `<div class="fu-row"><span class="fu-label">${special}</span><span class="fu-value">${unrounded}</span></div>`;
+        } else {
+            elements.fuBreakdownContent.style.display = 'block';
+            elements.fuSpecialContent.style.display = 'none';
+            elements.fuSpecialContent.innerHTML = '';
+
+            elements.fuBase.textContent = base;
+            elements.fuWinMethod.textContent = winMethod;
+            elements.fuWait.textContent = wait;
+            elements.fuPair.textContent = pair;
+            melds.forEach((meldFu, index) => {
+                const meldElement = document.getElementById(`fu-meld${index + 1}`);
+                if (meldElement) {
+                    meldElement.textContent = meldFu;
+                }
+            });
+        }
+
+        elements.fuTotalUnrounded.textContent = unrounded;
+        elements.fuTotalRounded.textContent = rounded;
+    }
+
 
     function highlightCell(han, fu) {
         const highlighted = document.querySelector('.highlight');
@@ -259,10 +315,8 @@ document.addEventListener('DOMContentLoaded', () => {
         hanHeaders.forEach(han => {
             html += `<tr><th>${han}ハン</th>`;
             fuHeaders.forEach(fu => {
-                // Pinfu tsumo (1-han 20-fu) is a valid hand, but some tables omit it.
-                // We will calculate it.
                 if (han === 1 && fu === 20 && state.isRon) {
-                     html += `<td id="cell-${han}-${fu}">-</td>`; // Menzen ron pinfu-less is not possible at 1-20
+                     html += `<td id="cell-${han}-${fu}">-</td>`;
                      return;
                 }
                 const score = calculateScore(han, fu);
@@ -288,16 +342,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 6. Main Update & Initialization ---
     function mainUpdate() {
-        updateControlStates(); // Update UI element states first
-        updateState();         // Read the latest state from the UI
+        updateControlStates();
+        updateState();
 
-        const unroundedFu = calculateFu();
-        const roundedFu = roundUpFu(unroundedFu);
-        const score = calculateScore(state.han, roundedFu);
+        const fuBreakdown = calculateFu();
+        const score = calculateScore(state.han, fuBreakdown.rounded);
 
-        updateDisplay(unroundedFu, roundedFu, score);
-        generateScoreTable(); // Regenerate table based on Oya/Ko and Ron/Tsumo
-        highlightCell(state.han, roundedFu);
+        updateDisplay(fuBreakdown, score);
+        updateFuBreakdownUI(fuBreakdown);
+        generateScoreTable();
+        highlightCell(state.han, fuBreakdown.rounded);
     }
 
     function init() {
