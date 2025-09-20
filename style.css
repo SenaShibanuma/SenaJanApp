@@ -65,6 +65,13 @@ header {
 
 h1, h2 {
     margin-top: 0;
+    margin-bottom: 0; /* Let the parent container handle spacing */
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 1rem;
 }
 
@@ -119,38 +126,65 @@ fieldset.disabled {
     border-radius: 6px;
 }
 
-.melds-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+.melds-grid {
+    display: grid;
+    /* Define columns: Label, Type, Options, Fu */
+    grid-template-columns: minmax(60px, auto) 1fr 1fr auto;
+    gap: 0.5rem 1rem;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+    margin-top: 1rem;
+    padding-top: 1rem;
 }
 
+.grid-header {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #555;
+    padding-bottom: 0.5rem;
+}
+
+.type-header, .options-header {
+    text-align: center;
+}
+
+/* Use display: contents to make children direct grid items */
 .meld-group, .pair-group {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    flex-wrap: nowrap; /* Prevent wrapping */
-    justify-content: space-between; /* Distribute space */
+    display: contents;
 }
 
 .meld-label, .pair-label {
-    font-weight: bold;
-    flex-shrink: 0; /* Don't shrink the label */
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
 }
 
-.meld-type {
+.meld-type, .meld-options, .pair-options {
     display: flex;
-    gap: 1rem;
-    flex-grow: 1; /* Allow type selection to grow */
+    gap: 0.5rem 1.5rem; /* row-gap, column-gap */
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center; /* Center items within the cell */
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
 }
 
-.meld-options, .pair-options {
-    display: flex;
-    gap: 1.5rem;
-    flex-shrink: 0; /* Don't shrink the options */
+.melds-grid .fu-value-display {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+    justify-self: center; /* Center the fu value in its column */
+    min-width: 50px; /* Ensure it has some width */
+}
+
+/* Remove bottom border from the last row (pair) */
+.pair-label, .pair-options, .melds-grid .pair-group .fu-value-display {
+    border-bottom: none;
+}
+
+/* Align pair options to span correctly */
+.pair-options {
+    grid-column: 2 / span 2;
 }
 
 #result-points {
@@ -296,5 +330,57 @@ hr {
     .fu-breakdown-area {
         position: static; /* Unstick for stacked layout */
         margin-top: 1rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .melds-grid {
+        display: block; /* Revert to block layout */
+        border-top: none;
+        margin-top: 0;
+        padding-top: 0;
+    }
+
+    .grid-header {
+        display: none; /* Hide grid headers on small screens */
+    }
+
+    .meld-group, .pair-group {
+        display: flex; /* Revert to flex for a card-like layout */
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem 1rem;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        margin-bottom: 0.75rem;
+    }
+
+    .meld-group:last-of-type {
+        margin-bottom: 0;
+    }
+
+    .meld-label, .pair-label, .meld-type, .meld-options, .pair-options, .melds-grid .fu-value-display {
+        border-bottom: none;
+        padding: 0;
+    }
+
+    .meld-label, .pair-label {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .meld-type {
+        flex-grow: 1;
+    }
+
+    .melds-grid .fu-value-display {
+        margin-left: auto;
+    }
+
+    .pair-options {
+        grid-column: auto; /* Reset from grid */
+        flex-grow: 1;
     }
 }
