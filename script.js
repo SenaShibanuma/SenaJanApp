@@ -260,12 +260,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let pointText;
         if (score.name) {
-            pointText = `${score.name} (${state.isOya ? score.oya : score.ko}点)`;
+            // For limit hands, display the name and total points
+            const totalPoints = state.isOya ? score.oya : score.ko;
+            pointText = `${score.name} (${totalPoints}点)`;
         } else {
              if (state.isRon) {
+                // For Ron, just display the Ron score
                 pointText = `ロン: ${score.ron}点`;
             } else {
-                pointText = `ツモ: ${score.tsumo}点`;
+                // For Tsumo, calculate and display the total
+                let totalPoints;
+                if (state.isOya) {
+                    // Oya tsumo: payment from each Ko player
+                    totalPoints = score.raw.tsumo * 3;
+                    pointText = `ツモ: ${score.tsumo} (${totalPoints}点)`;
+                } else {
+                    // Ko tsumo: payment from Oya and other Ko players
+                    totalPoints = score.raw.tsumoOya + (score.raw.tsumoKo * 2);
+                    pointText = `ツモ: ${score.tsumo} (${totalPoints}点)`;
+                }
             }
         }
         elements.resultPoints.textContent = pointText;
