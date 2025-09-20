@@ -46,9 +46,7 @@ header {
 }
 
 .fu-breakdown-area {
-    flex: 2;
-    position: sticky;
-    top: 1rem;
+   display: none;
 }
 
 .card {
@@ -128,6 +126,7 @@ fieldset.disabled {
     border: 1px solid var(--border-color);
     border-radius: 6px;
     flex-wrap: wrap;
+    position: relative;
 }
 
 .meld-label, .pair-label {
@@ -185,6 +184,32 @@ footer {
     padding: 1rem;
     color: #777;
     font-size: 0.9rem;
+}
+
+/* --- New Fu Display Styles --- */
+.fu-value-group {
+    position: relative;
+}
+
+.fu-value-display {
+    background-color: var(--disabled-bg-color);
+    border-radius: 6px;
+    font-weight: bold;
+    min-width: 28px;
+    padding: 6px 10px;
+    position: absolute;
+    right: 1rem;
+    text-align: center;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    display: none; /* Hidden by default, shown by JS */
+}
+
+.fu-value-display.visible {
+    display: inline-block;
 }
 
 /* --- Fu Breakdown Styles --- */

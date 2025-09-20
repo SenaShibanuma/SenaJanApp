@@ -58,6 +58,7 @@
                                 <input type="checkbox" id="meld1-is-open"> <label for="meld1-is-open">鳴き</label>
                                 <input type="checkbox" id="meld1-is-yaochu"> <label for="meld1-is-yaochu">幺九牌</label>
                             </div>
+                            <span class="fu-value-display" id="meld1-fu-value"></span>
                         </div>
                         <!-- 面子2 -->
                         <div class="meld-group" data-meld-id="2">
@@ -71,6 +72,7 @@
                                <input type="checkbox" id="meld2-is-open"> <label for="meld2-is-open">鳴き</label>
                                <input type="checkbox" id="meld2-is-yaochu"> <label for="meld2-is-yaochu">幺九牌</label>
                             </div>
+                            <span class="fu-value-display" id="meld2-fu-value"></span>
                         </div>
                         <!-- 面子3 -->
                         <div class="meld-group" data-meld-id="3">
@@ -84,6 +86,7 @@
                                <input type="checkbox" id="meld3-is-open"> <label for="meld3-is-open">鳴き</label>
                                <input type="checkbox" id="meld3-is-yaochu"> <label for="meld3-is-yaochu">幺九牌</label>
                             </div>
+                            <span class="fu-value-display" id="meld3-fu-value"></span>
                         </div>
                         <!-- 面子4 -->
                         <div class="meld-group" data-meld-id="4">
@@ -97,6 +100,7 @@
                                <input type="checkbox" id="meld4-is-open"> <label for="meld4-is-open">鳴き</label>
                                <input type="checkbox" id="meld4-is-yaochu"> <label for="meld4-is-yaochu">幺九牌</label>
                             </div>
+                            <span class="fu-value-display" id="meld4-fu-value"></span>
                         </div>
                     </div>
 
@@ -106,13 +110,14 @@
                         <div class="pair-options">
                             <input type="checkbox" id="pair-is-yakuhai"> <label for="pair-is-yakuhai">役牌</label>
                         </div>
+                        <span class="fu-value-display" id="pair-fu-value"></span>
                     </div>
                 </fieldset>
             </section>
 
             <section class="card">
                 <h2>詳細設定</h2>
-                <div class="form-group">
+                <div class="form-group fu-value-group">
                     <label>待ち方:</label>
                     <select id="wait-type">
                         <option value="ryanmen">両面待ち</option>
@@ -121,11 +126,13 @@
                         <option value="shanpon">シャンポン待ち</option>
                         <option value="tanki">単騎待ち</option>
                     </select>
+                    <span class="fu-value-display" id="wait-fu-value"></span>
                 </div>
-                <div class="form-group">
+                <div class="form-group fu-value-group">
                     <label>和了り方:</label>
                     <input type="radio" id="win-ron" name="win-method" value="ron" checked> <label for="win-ron">ロン</label>
                     <input type="radio" id="win-tsumo" name="win-method" value="tsumo"> <label for="win-tsumo">ツモ</label>
+                    <span class="fu-value-display" id="win-method-fu-value"></span>
                 </div>
             </section>
 
