@@ -113,18 +113,42 @@ fieldset {
 }
 
 fieldset.disabled {
-    opacity: 0.5;
-    background-color: var(--disabled-bg-color);
-    border-radius: 8px;
+    opacity: 0.6; /* Slight opacity so it's not too faint */
     pointer-events: none; /* Prevents interaction */
+}
+
+/* Style for disabled labels inside the fieldset for better readability */
+fieldset.disabled label {
+    text-decoration: line-through;
+    color: var(--disabled-text-color);
 }
 
 .global-modifiers {
     margin-bottom: 1.5rem;
     padding: 0.5rem;
-    background-color: #f7f7f7;
+    /* background-color: #f7f7f7; /* Removed background from container */
     border-radius: 6px;
+    display: flex; /* Use flexbox for alignment */
+    gap: 0.5rem;   /* Add gap between items */
 }
+
+.yaku-selector {
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+}
+
+.yaku-selector.yaku-active {
+    background-color: #e7f3ff; /* A light blue to indicate active */
+    border-color: #8ab4f8;
+}
+
+.yaku-selector label {
+    font-weight: normal; /* Labels are already bold due to parent */
+}
+
 
 .melds-container {
     margin-top: 1rem;

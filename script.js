@@ -94,6 +94,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function updateYakuVisuals() {
+        // Update visual state for Tanyao
+        const tanyaoParent = elements.isTanyao.closest('.yaku-selector');
+        tanyaoParent.classList.toggle('yaku-active', elements.isTanyao.checked);
+
+        // Update visual state for Pinfu
+        const pinfuParent = elements.isPinfu.closest('.yaku-selector');
+        pinfuParent.classList.toggle('yaku-active', elements.isPinfu.checked);
+    }
+
     function updateControlStates() {
         const isChiitoitsu = elements.isChiitoitsu.checked;
         const isPinfu = elements.isPinfu.checked;
@@ -106,11 +116,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Uncheck Pinfu/Tanyao if Chiitoitsu is selected
             if (elements.isPinfu.checked) elements.isPinfu.checked = false;
             if (elements.isTanyao.checked) elements.isTanyao.checked = false;
+
             // No need to proceed further if it's chiitoitsu
+            updateYakuVisuals(); // Ensure visuals are reset
             return;
         }
 
         // --- 2. Pinfu / Tanyao Logic ---
+        updateYakuVisuals(); // Update visuals based on current state
+
         // Loop through melds to set states based on global modifiers
         elements.meldGroups.forEach(group => {
             const id = group.dataset.meldId;
@@ -257,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 4. DOM Update Functions ---
     function updateDisplay(fuBreakdown, score) {
-        elements.resultHanFu.textContent = `${state.han}ハン ${fuBreakdown.rounded}符`;
+        elements.resultHanFu.textContent = `${state.han}飜 ${fuBreakdown.rounded}符`;
 
         let pointText;
         if (score.name) {
@@ -367,12 +381,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const fuHeaders = [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110];
         const hanHeaders = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
-        let html = '<thead><tr><th>ハン/符</th>';
+        let html = '<thead><tr><th>飜/符</th>';
         fuHeaders.forEach(fu => html += `<th>${fu}符</th>`);
         html += '</tr></thead><tbody>';
 
         hanHeaders.forEach(han => {
-            html += `<tr><th>${han}ハン</th>`;
+            html += `<tr><th>${han}飜</th>`;
             fuHeaders.forEach(fu => {
                 if (han === 1 && fu === 20 && state.isRon) {
                      html += `<td id="cell-${han}-${fu}">-</td>`;
