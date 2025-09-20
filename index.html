@@ -28,83 +28,83 @@
             </div>
         </section>
 
-        <section class="fu-calculator-card">
-            <h2>符計算</h2>
-            <fieldset id="fu-fieldset">
-                <legend>符の要素をチェックしてください</legend>
+        <section class="hand-composition-card">
+            <h2>手牌の構成</h2>
 
-                <!-- Winning Style -->
-                <div class="form-group fu-item">
+            <div class="form-group">
+                <label>手牌の種類:</label>
+                <input type="radio" id="hand-type-standard" name="hand-type" value="standard" checked>
+                <label for="hand-type-standard">通常手</label>
+                <input type="radio" id="hand-type-chiitoitsu" name="hand-type" value="chiitoitsu">
+                <label for="hand-type-chiitoitsu">七対子</label>
+            </div>
+
+            <div class="form-group global-modifiers">
+                <input type="checkbox" id="is-pinfu"> <label for="is-pinfu">平和 (ピンフ)</label>
+                <input type="checkbox" id="is-tanyao"> <label for="is-tanyao">断幺九 (タンヤオ)</label>
+            </div>
+
+            <fieldset id="standard-hand-fieldset">
+                <legend>面子と雀頭</legend>
+
+                <div class="melds-container">
+                    <div class="meld-group" data-meld-id="1">
+                        <span class="meld-label">面子1:</span>
+                        <input type="radio" id="meld1-shuntsu" name="meld1-type" value="shuntsu" checked> <label for="meld1-shuntsu">順子</label>
+                        <input type="radio" id="meld1-koutsu" name="meld1-type" value="koutsu"> <label for="meld1-koutsu">刻子</label>
+                        <div class="meld-options">
+                            <input type="checkbox" id="meld1-is-open"> <label for="meld1-is-open">鳴き</label>
+                            <input type="checkbox" id="meld1-is-yaochu"> <label for="meld1-is-yaochu">幺九牌</label>
+                        </div>
+                    </div>
+                     <div class="meld-group" data-meld-id="2">
+                        <span class="meld-label">面子2:</span>
+                        <input type="radio" id="meld2-shuntsu" name="meld2-type" value="shuntsu" checked> <label for="meld2-shuntsu">順子</label>
+                        <input type="radio" id="meld2-koutsu" name="meld2-type" value="koutsu"> <label for="meld2-koutsu">刻子</label>
+                        <div class="meld-options">
+                            <input type="checkbox" id="meld2-is-open"> <label for="meld2-is-open">鳴き</label>
+                            <input type="checkbox" id="meld2-is-yaochu"> <label for="meld2-is-yaochu">幺九牌</label>
+                        </div>
+                    </div>
+                     <div class="meld-group" data-meld-id="3">
+                        <span class="meld-label">面子3:</span>
+                        <input type="radio" id="meld3-shuntsu" name="meld3-type" value="shuntsu" checked> <label for="meld3-shuntsu">順子</label>
+                        <input type="radio" id="meld3-koutsu" name="meld3-type" value="koutsu"> <label for="meld3-koutsu">刻子</label>
+                        <div class="meld-options">
+                            <input type="checkbox" id="meld3-is-open"> <label for="meld3-is-open">鳴き</label>
+                            <input type="checkbox" id="meld3-is-yaochu"> <label for="meld3-is-yaochu">幺九牌</label>
+                        </div>
+                    </div>
+                     <div class="meld-group" data-meld-id="4">
+                        <span class="meld-label">面子4:</span>
+                        <input type="radio" id="meld4-shuntsu" name="meld4-type" value="shuntsu" checked> <label for="meld4-shuntsu">順子</label>
+                        <input type="radio" id="meld4-koutsu" name="meld4-type" value="koutsu"> <label for="meld4-koutsu">刻子</label>
+                        <div class="meld-options">
+                            <input type="checkbox" id="meld4-is-open"> <label for="meld4-is-open">鳴き</label>
+                            <input type="checkbox" id="meld4-is-yaochu"> <label for="meld4-is-yaochu">幺九牌</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pair-group form-group">
+                    <label>雀頭:</label>
+                    <input type="checkbox" id="pair-is-yakuhai"> <label for="pair-is-yakuhai">役牌</label>
+                </div>
+                 <div class="form-group">
+                    <label>待ち方:</label>
+                    <select id="wait-type">
+                        <option value="ryanmen">両面待ち</option>
+                        <option value="kanchan">カンチャン待ち</option>
+                        <option value="penchan">ペンチャン待ち</option>
+                        <option value="shanpon">シャンポン待ち</option>
+                        <option value="tanki">単騎待ち</option>
+                    </select>
+                </div>
+                 <div class="form-group">
                     <label>和了り方:</label>
                     <input type="radio" id="win-ron" name="win-method" value="ron" checked> <label for="win-ron">ロン</label>
                     <input type="radio" id="win-tsumo" name="win-method" value="tsumo"> <label for="win-tsumo">ツモ</label>
                 </div>
-                <div class="form-group fu-item">
-                    <input type="checkbox" id="is-menzen" checked> <label for="is-menzen">門前 (メンゼン)</label>
-                </div>
-
-                <!-- Waits -->
-                <div class="form-group fu-item">
-                    <label>待ち方:</label>
-                    <select id="wait-type">
-                        <option value="ryanmen">両面待ち (0符)</option>
-                        <option value="kanchan">カンチャン待ち (2符)</option>
-                        <option value="penchan">ペンチャン待ち (2符)</option>
-                        <option value="shanpon">シャンポン待ち (2符)</option>
-                        <option value="tanki">単騎待ち (2符)</option>
-                    </select>
-                </div>
-
-                <!-- Pair -->
-                <div class="form-group fu-item">
-                    <label>雀頭 (アタマ):</label>
-                    <select id="pair-type">
-                        <option value="other">その他 (0符)</option>
-                        <option value="yakuhai">役牌 (2符)</option>
-                        <option value="double-yakuhai">連風牌 (4符)</option>
-                    </select>
-                </div>
-
-                <!-- Melds (Mentsu) -->
-                <div class="form-group fu-item">
-                    <label>面子 (メンツ):</label>
-                    <table>
-                        <tr>
-                            <th>種類</th>
-                            <th>明 (ミン)</th>
-                            <th>暗 (アン)</th>
-                        </tr>
-                        <tr>
-                            <td>中張牌・刻子</td>
-                            <td><input type="number" class="meld-input" id="minko-open-simples" min="0" value="0"> (2符)</td>
-                            <td><input type="number" class="meld-input" id="anko-simples" min="0" value="0"> (4符)</td>
-                        </tr>
-                        <tr>
-                            <td>么九牌・刻子</td>
-                            <td><input type="number" class="meld-input" id="minko-open-honors" min="0" value="0"> (4符)</td>
-                            <td><input type="number" class="meld-input" id="anko-honors" min="0" value="0"> (8符)</td>
-                        </tr>
-                        <tr>
-                            <td>中張牌・槓子</td>
-                            <td><input type="number" class="meld-input" id="minkan-open-simples" min="0" value="0"> (8符)</td>
-                            <td><input type="number" class="meld-input" id="ankan-simples" min="0" value="0"> (16符)</td>
-                        </tr>
-                        <tr>
-                            <td>么九牌・槓子</td>
-                            <td><input type="number" class="meld-input" id="minkan-open-honors" min="0" value="0"> (16符)</td>
-                            <td><input type="number" class="meld-input" id="ankan-honors" min="0" value="0"> (32符)</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <!-- Special Cases -->
-                <div class="form-group fu-item">
-                    <input type="checkbox" id="is-pinfu-tsumo"> <label for="is-pinfu-tsumo">ツモ平和 (ピンフツモ) (2符)</label>
-                </div>
-                 <div class="form-group fu-item">
-                    <input type="checkbox" id="is-chiitoitsu"> <label for="is-chiitoitsu">七対子 (チートイツ) (25符)</label>
-                </div>
-
             </fieldset>
         </section>
 
