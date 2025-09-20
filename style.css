@@ -1,0 +1,170 @@
+:root {
+    --bg-color: #f4f7f9;
+    --card-bg-color: #ffffff;
+    --text-color: #333;
+    --primary-color: #007bff;
+    --border-color: #e0e0e0;
+    --highlight-bg-color: #ffc107;
+    --highlight-text-color: #000;
+    --header-bg-color: #343a40;
+    --header-text-color: #fff;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+header {
+    background-color: var(--header-bg-color);
+    color: var(--header-text-color);
+    padding: 1rem 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+        "settings results"
+        "fu-calc  table";
+}
+
+/* Card styling */
+.settings-card, .fu-calculator-card, .results-card, .score-table-card {
+    background-color: var(--card-bg-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+}
+
+.fu-calculator-card {
+    grid-area: fu-calc;
+}
+
+.settings-card {
+    grid-area: settings;
+}
+
+.results-card {
+    grid-area: results;
+}
+
+.score-table-card {
+    grid-area: table;
+    overflow-x: auto; /* For smaller screens if table is wide */
+}
+
+
+h1, h2 {
+    margin-top: 0;
+}
+
+h2 {
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Form elements */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+label {
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+input[type="number"], select {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    width: 80px;
+    min-height: 44px;
+    font-size: 16px; /* Prevents auto-zoom on iOS */
+}
+
+input[type="radio"], input[type="checkbox"] {
+    margin-right: 0.25rem;
+    transform: scale(1.2); /* Makes radio/checkboxes slightly larger */
+}
+
+fieldset {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 1rem;
+}
+
+fieldset:disabled {
+    opacity: 0.5;
+}
+
+legend {
+    font-weight: bold;
+    padding: 0 0.5rem;
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th, td {
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    text-align: center;
+    min-width: 50px;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+/* Results and Highlight */
+#result-points {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.highlight {
+    background-color: var(--highlight-bg-color);
+    color: var(--highlight-text-color);
+    font-weight: bold;
+}
+
+footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 1rem;
+    color: #777;
+}
+
+/* Responsive layout */
+@media (max-width: 992px) {
+    .container {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "results"
+            "settings"
+            "fu-calc"
+            "table";
+    }
+}
