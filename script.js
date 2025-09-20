@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Results
         resultHanFu: document.getElementById('result-han-fu'),
         resultPoints: document.getElementById('result-points'),
+        resultTotalFu: document.getElementById('result-total-fu'),
         scoreTable: document.getElementById('score-table'),
 
         // Fu Breakdown
@@ -161,27 +162,42 @@ document.addEventListener('DOMContentLoaded', () => {
             pair: 0,
             wait: 0,
             winMethod: 0,
-            special: null, // To store text for special cases like "Chiitoitsu"
+            chiitoitsu: 0,
+            special: null,
             unrounded: 0,
             rounded: 0
         };
 
+        // Case 1: Chiitoitsu (Seven Pairs)
         if (state.handType === 'chiitoitsu') {
             fuBreakdown.special = '七対子';
-            fuBreakdown.unrounded = 25;
-            fuBreakdown.rounded = 25;
-            return fuBreakdown;
-        }
-
-        // Tsumo Pinfu is a special case, fixed at 20 fu.
-        if (state.isPinfu && !state.isRon) {
-            fuBreakdown.special = '平和ツモ';
             fuBreakdown.base = 20;
-            fuBreakdown.unrounded = 20;
-            fuBreakdown.rounded = 20;
+            fuBreakdown.chiitoitsu = 5; // As per user request
+            fuBreakdown.unrounded = 25;
+            fuBreakdown.rounded = 25; // Chiitoitsu is always fixed at 25
             return fuBreakdown;
         }
 
+        // Case 2: Pinfu (No Fu Hand)
+        if (state.isPinfu) {
+            if (state.isRon) {
+                // Pinfu Ron is 30 fu (20 base + 10 for closed ron)
+                fuBreakdown.special = '平和ロン';
+                fuBreakdown.base = 20;
+                fuBreakdown.winMethod = 10;
+                fuBreakdown.unrounded = 30;
+                fuBreakdown.rounded = 30;
+            } else {
+                // Pinfu Tsumo is 20 fu (base only)
+                fuBreakdown.special = '平和ツモ';
+                fuBreakdown.base = 20;
+                fuBreakdown.unrounded = 20;
+                fuBreakdown.rounded = 20;
+            }
+            return fuBreakdown;
+        }
+
+        // Case 3: Standard Hand
         let fu = 20;
         fuBreakdown.base = 20;
 
@@ -190,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fuBreakdown.winMethod = 10;
             fu += 10;
         }
-        if (!state.isRon && !state.isPinfu) { // Tsumo win (but not for Pinfu)
+        if (!state.isRon) { // Tsumo win always gets 2 fu (except Pinfu, handled above)
             fuBreakdown.winMethod = 2;
             fu += 2;
         }
@@ -222,7 +238,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         fuBreakdown.unrounded = fu;
-        fuBreakdown.rounded = (fu === 25) ? 25 : Math.ceil(fu / 10) * 10;
+        // All fu totals are rounded up to the nearest 10, except for Chiitoitsu (25).
+        fuBreakdown.rounded = Math.ceil(fu / 10) * 10;
 
         return fuBreakdown;
     }
@@ -257,6 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. DOM Update Functions ---
     function updateDisplay(fuBreakdown, score) {
         elements.resultHanFu.textContent = `${state.han}ハン ${fuBreakdown.rounded}符`;
+        elements.resultTotalFu.textContent = `${fuBreakdown.rounded}符`; // Update new total fu display
 
         let pointText;
         if (score.name) {
@@ -272,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateFuBreakdownUI(fuBreakdown) {
-        const { base, melds, pair, wait, winMethod, special, unrounded, rounded } = fuBreakdown;
+        const { base, melds, pair, wait, winMethod, chiitoitsu, special, unrounded, rounded } = fuBreakdown;
 
         // Helper to update the new display elements
         const updateFuDisplay = (element, value) => {
@@ -284,16 +302,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        if (special) {
-            // Hide all individual fu displays for special hands like Chiitoitsu
-            updateFuDisplay(elements.winMethodFuValue, 0);
-            updateFuDisplay(elements.waitFuValue, 0);
-            updateFuDisplay(elements.pairFuValue, 0);
-            updateFuDisplay(elements.meld1FuValue, 0);
-            updateFuDisplay(elements.meld2FuValue, 0);
-            updateFuDisplay(elements.meld3FuValue, 0);
-            updateFuDisplay(elements.meld4FuValue, 0);
-        } else {
+        // Always hide all individual fu displays first, then show the ones needed.
+        updateFuDisplay(elements.winMethodFuValue, 0);
+        updateFuDisplay(elements.waitFuValue, 0);
+        updateFuDisplay(elements.pairFuValue, 0);
+        melds.forEach((_, index) => updateFuDisplay(elements[`meld${index+1}FuValue`], 0));
+
+        if (!special) {
             // Update individual fu displays for standard hands
             updateFuDisplay(elements.winMethodFuValue, winMethod);
             updateFuDisplay(elements.waitFuValue, wait);
@@ -306,12 +321,19 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // --- Keep old logic for the hidden panel to minimize risk ---
-        if (special) {
+        // --- Logic for the right-side breakdown panel ---
+        if (special === '七対子') {
+            elements.fuBreakdownContent.style.display = 'none';
+            elements.fuSpecialContent.style.display = 'block';
+            elements.fuSpecialContent.innerHTML = `
+                <div class="fu-row"><span class="fu-label">符底</span><span class="fu-value">${base}</span></div>
+                <div class="fu-row"><span class="fu-label">七対子</span><span class="fu-value">${chiitoitsu}</span></div>
+            `;
+        } else if (special) { // Pinfu cases
             elements.fuBreakdownContent.style.display = 'none';
             elements.fuSpecialContent.style.display = 'block';
             elements.fuSpecialContent.innerHTML = `<div class="fu-row"><span class="fu-label">${special}</span><span class="fu-value">${unrounded}</span></div>`;
-        } else {
+        } else { // Standard hand
             elements.fuBreakdownContent.style.display = 'block';
             elements.fuSpecialContent.style.display = 'none';
             elements.fuSpecialContent.innerHTML = '';

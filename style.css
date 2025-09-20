@@ -105,6 +105,14 @@ fieldset.disabled {
     pointer-events: none; /* Prevents interaction */
 }
 
+.fu-base-display {
+    padding: 0.5rem;
+    background-color: #f7f7f7;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
 .global-modifiers {
     margin-bottom: 1.5rem;
     padding: 0.5rem;
@@ -137,10 +145,10 @@ fieldset.disabled {
 .meld-type {
     display: flex;
     gap: 1rem;
+    margin-right: auto;
 }
 
 .meld-options, .pair-options {
-    margin-left: auto;
     display: flex;
     gap: 1.5rem;
 }
@@ -149,6 +157,16 @@ fieldset.disabled {
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--primary-color);
+}
+
+.result-fu-total {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #0056b3; /* A nice deep blue */
+}
+
+.result-fu-total strong {
+    color: #d93025; /* A contrasting red for the number */
 }
 
 .score-table-card {
@@ -197,11 +215,11 @@ footer {
     font-weight: bold;
     min-width: 28px;
     padding: 6px 10px;
-    position: absolute;
-    right: 1rem;
+    /* position: absolute; REMOVED */
+    /* right: 1rem; REMOVED */
     text-align: center;
-    top: 50%;
-    transform: translateY(-50%);
+    /* top: 50%; REMOVED */
+    /* transform: translateY(-50%); REMOVED */
     font-size: 0.9rem;
     color: var(--text-color);
     border: 1px solid var(--border-color);
