@@ -19,10 +19,14 @@
   - `fu-breakdown-area`内に、符計算の各項目のためのプレースホルダー要素を配置する。
   - `fu-breakdown-content`と`fu-special-content`の2つのコンテナを持ち、通常手と特殊役（七対子など）で表示を切り替える。
 - **手牌構成:**
+  - `<div class="section-header">`を追加し、タイトル(`h2`)と符底(`span.fu-base-display`)を横並びに配置。
   - 「七対子」チェックボックスを最上部に配置。
   - 「断幺九」「平和」チェックボックスを面子設定の上に配置。
-  - 4つの面子を`<div class="meld-group">`として個別に定義し、それぞれがラジオボタンやチェックボックスを持つ。
-  - 雀頭を`<div class="pair-group">`として定義する。
+  - **`<div class="melds-grid">`**:
+    - CSS Gridを使用して、面子と雀頭の入力を表形式で整列させるためのコンテナ。
+    - 4列（ラベル、種類、オプション、符）で構成される。
+    - 先頭に`<div class="grid-header">`を配置し、各列のタイトルを表示する。
+    - 4つの面子と雀頭の各行は、`<div class="meld-group">`と`<div class="pair-group">`をそのまま使用する。これらの要素に`display: contents`を適用することで、内部の要素が直接グリッドアイテムとして扱われる。
   - 面子と雀頭の設定全体を`<fieldset id="standard-hand-fieldset">`で囲み、一括での有効/無効化を容易にする。
 
 ## 3. JavaScript設計 (`script.js`)
@@ -43,7 +47,12 @@
 - **レイアウト:**
   - Flexboxを使い、PCなどの幅広の画面では2カラムレイアウトを実現 (`.container`に`display: flex`)。
   - `fu-breakdown-area`は`position: sticky`で画面右側に固定表示する。
-  - `@media (max-width: 800px)`のメディアクエリを用いて、スマートフォンなどの幅の狭い画面では1カラムにスタックするレスポンシブデザインを採用。
+  - **手牌構成エリア**:
+    - `.melds-grid`に`display: grid`を適用し、ヘッダー付きの表形式レイアウトを実装。
+    - `display: contents`を`.meld-group`と`.pair-group`に適用し、HTML構造を変更せずにグリッドレイアウトを実現。
+  - **レスポンシブデザイン**:
+    - `@media (max-width: 800px)`: 全体を1カラムにスタック。
+    - `@media (max-width: 640px)`: `.melds-grid`のレイアウトを`display: block`に戻し、各面子入力をカード形式で縦に積むことで、狭い画面での可読性を確保。
 - **UI状態の可視化:**
   - `:disabled`擬似クラスや、JSによって動的に付与される`.disabled`クラスセレクタを使用して、操作不能なUI要素を明確にグレーアウト表示する。
 - **変数:** CSSカスタムプロパティでカラーテーマを管理し、一貫性を保つ。
