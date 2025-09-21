@@ -35,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Fu Breakdown
         fuBreakdownContent: document.getElementById('fu-breakdown-content'),
-        fuSpecialContent: document.getElementById('fu-special-content'),
         fuBase: document.getElementById('fu-base'),
         fuWinMethod: document.getElementById('fu-win-method'),
         fuMeld1: document.getElementById('fu-meld1'),
@@ -335,7 +334,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const allFuRows = document.querySelectorAll('.fu-row');
         allFuRows.forEach(row => row.classList.remove('fu-strikethrough'));
         document.getElementById('fu-chiitoitsu-row').style.display = 'none';
-        elements.fuSpecialContent.style.display = 'none'; // Hide old special content area
         elements.fuChiitoitsu.classList.remove('fu-value-chiitoitsu');
 
 
