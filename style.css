@@ -189,6 +189,17 @@ fieldset.disabled label {
     font-weight: normal; /* Labels are already bold due to parent */
 }
 
+/* --- Yaku Value Display (e.g., for Chiitoitsu) --- */
+.yaku-value-display {
+    background-color: var(--highlight-bg-color);
+    color: #1a1a1a; /* Dark text for contrast on yellow */
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-left: 0.5rem; /* Space from the label */
+}
+
 
 .melds-container {
     margin-top: 1rem;

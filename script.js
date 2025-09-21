@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // For special hands, hide all individual fu displays on the form, with exceptions
         if (special === '七対子') {
-            updateFuDisplay(elements.winMethodFuValue, 0); // Hide win method fu
+            updateFuDisplay(elements.winMethodFuValue, winMethod, true); // Show win method fu with strikethrough
             updateFuDisplay(elements.waitFuValue, wait, true); // Show wait fu with strikethrough
             updateFuDisplay(elements.pairFuValue, 0); // Hide pair fu
             melds.forEach((meldFu, index) => {
