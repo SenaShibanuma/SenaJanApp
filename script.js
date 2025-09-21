@@ -182,10 +182,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Pinfu forces a ryanmen wait
-        elements.waitType.disabled = isPinfu;
+        // Pinfu forces a ryanmen wait, Chiitoitsu forces tanki
         if (isPinfu) {
+            elements.waitType.disabled = true;
             elements.waitType.value = 'ryanmen';
+        } else if (isChiitoitsu) {
+            elements.waitType.disabled = true;
+            elements.waitType.value = 'tanki';
+        } else {
+            elements.waitType.disabled = false;
         }
 
         // Pair's yakuhai status is disabled by Pinfu OR Tanyao
@@ -385,24 +390,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // --- 4. Update the main fu value displays in the form ---
-        const updateFuDisplay = (element, value) => {
+        const updateFuDisplay = (element, value, strikethrough = false) => {
+            element.classList.remove('fu-strikethrough-inline'); // Reset strikethrough
             if (value > 0) {
                 element.textContent = value;
                 element.classList.add('visible');
+                if (strikethrough) {
+                    element.classList.add('fu-strikethrough-inline');
+                }
             } else {
                 element.classList.remove('visible');
             }
         };
 
-        // For special hands, hide all individual fu displays on the form
-        const hideFormFu = (special === '七対子' || special === '平和ツモ');
-        updateFuDisplay(elements.winMethodFuValue, hideFormFu ? 0 : winMethod);
-        updateFuDisplay(elements.waitFuValue, hideFormFu ? 0 : wait);
-        updateFuDisplay(elements.pairFuValue, hideFormFu ? 0 : pair);
-        melds.forEach((meldFu, index) => {
-            const meldElement = elements[`meld${index + 1}FuValue`];
-            if (meldElement) updateFuDisplay(meldElement, hideFormFu ? 0 : meldFu);
-        });
+        // For special hands, hide all individual fu displays on the form, with exceptions
+        if (special === '七対子') {
+            updateFuDisplay(elements.winMethodFuValue, 0); // Hide win method fu
+            updateFuDisplay(elements.waitFuValue, wait, true); // Show wait fu with strikethrough
+            updateFuDisplay(elements.pairFuValue, 0); // Hide pair fu
+            melds.forEach((meldFu, index) => {
+                const meldElement = elements[`meld${index + 1}FuValue`];
+                if (meldElement) updateFuDisplay(meldElement, 0);
+            });
+        } else {
+            const hideFormFu = (special === '平和ツモ');
+            updateFuDisplay(elements.winMethodFuValue, hideFormFu ? 0 : winMethod);
+            updateFuDisplay(elements.waitFuValue, hideFormFu ? 0 : wait);
+            updateFuDisplay(elements.pairFuValue, hideFormFu ? 0 : pair);
+            melds.forEach((meldFu, index) => {
+                const meldElement = elements[`meld${index + 1}FuValue`];
+                if (meldElement) updateFuDisplay(meldElement, hideFormFu ? 0 : meldFu);
+            });
+        }
 
         // --- 5. Update total fu values ---
         elements.fuTotalUnrounded.textContent = unrounded;
