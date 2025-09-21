@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
         isKo: document.getElementById('is-ko'),
         isOya: document.getElementById('is-oya'),
         hanInput: document.getElementById('han-input'),
+        hanMinus: document.getElementById('han-minus'),
+        hanPlus: document.getElementById('han-plus'),
 
         // Hand Type
         isChiitoitsu: document.getElementById('is-chiitoitsu'),
@@ -98,6 +100,11 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.isChiitoitsu.closest('.yaku-selector')?.classList.toggle('yaku-active', elements.isChiitoitsu.checked);
         elements.isTanyao.closest('.yaku-selector')?.classList.toggle('yaku-active', elements.isTanyao.checked);
         elements.isPinfu.closest('.yaku-selector')?.classList.toggle('yaku-active', elements.isPinfu.checked);
+    }
+
+    function updateHanButtons() {
+        const han = parseInt(elements.hanInput.value, 10);
+        elements.hanMinus.disabled = han <= 1;
     }
 
     function updateControlStates() {
@@ -447,6 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function mainUpdate() {
         updateControlStates();
         updateState();
+        updateHanButtons();
 
         const fuBreakdown = calculateFu();
         const score = calculateScore(state.han, fuBreakdown.rounded);
@@ -469,6 +477,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         allControls.forEach(control => {
             control.addEventListener('input', mainUpdate);
+        });
+
+        // Han button listeners
+        elements.hanMinus.addEventListener('click', () => {
+            let currentValue = parseInt(elements.hanInput.value, 10);
+            if (currentValue > 1) {
+                elements.hanInput.value = currentValue - 1;
+                mainUpdate();
+            }
+        });
+
+        elements.hanPlus.addEventListener('click', () => {
+            let currentValue = parseInt(elements.hanInput.value, 10);
+            elements.hanInput.value = currentValue + 1;
+            mainUpdate();
         });
 
         // Specific listeners for mutually exclusive yaku

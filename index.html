@@ -28,7 +28,11 @@
                 </div>
                 <div class="form-group">
                     <label for="han-input">飜数:</label>
-                    <input type="number" id="han-input" min="1" value="1">
+                    <div class="han-input-container">
+                        <button type="button" id="han-minus" class="han-button">-</button>
+                        <input type="number" id="han-input" inputmode="numeric" min="1" value="1">
+                        <button type="button" id="han-plus" class="han-button">+</button>
+                    </div>
                 </div>
             </section>
 
