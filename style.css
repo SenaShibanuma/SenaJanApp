@@ -198,6 +198,11 @@ fieldset.disabled label {
     border-radius: 6px;
     font-size: 0.9rem;
     margin-left: 0.5rem; /* Space from the label */
+    display: none; /* Hidden by default */
+}
+
+.yaku-value-display.visible {
+    display: inline-block; /* Shown by JS */
 }
 
 
