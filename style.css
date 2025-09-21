@@ -424,6 +424,13 @@ footer {
     background-color: var(--strikethrough-bg-color);
 }
 
+/* Strikethrough for individual fu value displays */
+.fu-value-display.fu-strikethrough-inline {
+    text-decoration: line-through;
+    color: var(--disabled-text-color);
+    background-color: var(--strikethrough-bg-color);
+}
+
 .fu-row.fu-strikethrough .fu-label,
 .fu-row.fu-strikethrough .fu-value {
     color: var(--disabled-text-color);
