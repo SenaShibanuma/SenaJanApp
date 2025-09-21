@@ -213,11 +213,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (state.handType === 'chiitoitsu') {
             fuBreakdown.special = '七対子';
-            fuBreakdown.base = 20; // Base fu is still counted
-            fuBreakdown.chiitoitsu = 5; // The "hand composition" fu is 5
-            fuBreakdown.unrounded = 25; // Raw value is 25
-            fuBreakdown.rounded = 25;  // No rounding up for chiitoitsu
-            // All other fu components are 0, but we return them for display purposes
+            fuBreakdown.base = 20;
+            fuBreakdown.chiitoitsu = 5;
+
+            // Calculate fu for win method and wait type for display purposes, but don't add to total.
+            // Chiitoitsu is always a single wait (tanki).
+            fuBreakdown.wait = 2;
+            // Win method fu depends on Ron or Tsumo.
+            if (state.isRon) {
+                fuBreakdown.winMethod = 10;
+            } else {
+                fuBreakdown.winMethod = 2;
+            }
+
+            fuBreakdown.unrounded = 25; // Total remains 25
+            fuBreakdown.rounded = 25;  // Total remains 25
             return fuBreakdown;
         }
 
