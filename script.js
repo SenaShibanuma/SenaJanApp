@@ -27,19 +27,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Wait and Win type
         waitType: document.getElementById('wait-type'),
-        winRon: document.getElementById('win-ron'),
-        winTsumo: document.getElementById('win-tsumo'),
 
         // Results
         resultHanFu: document.getElementById('result-han-fu'),
-        resultPoints: document.getElementById('result-points'),
+        resultPointsRon: document.getElementById('result-points-ron'),
+        resultPointsTsumo: document.getElementById('result-points-tsumo'),
         scoreTable: document.getElementById('score-table'),
         resultFuTotalDisplay: document.getElementById('result-fu-total-display'),
 
         // Fu Breakdown
         fuBreakdownContent: document.getElementById('fu-breakdown-content'),
         fuBase: document.getElementById('fu-base'),
-        fuWinMethod: document.getElementById('fu-win-method'),
         fuMeld1: document.getElementById('fu-meld1'),
         fuMeld2: document.getElementById('fu-meld2'),
         fuMeld3: document.getElementById('fu-meld3'),
@@ -51,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fuTotalRounded: document.getElementById('fu-total-rounded'),
 
         // New Fu Value Displays
-        winMethodFuValue: document.getElementById('win-method-fu-value'),
         waitFuValue: document.getElementById('wait-fu-value'),
         pairFuValue: document.getElementById('pair-fu-value'),
         meld1FuValue: document.getElementById('meld1-fu-value'),
@@ -68,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
         state.isOya = elements.isOya.checked;
         state.han = parseInt(elements.hanInput.value, 10) || 0;
         state.handType = elements.isChiitoitsu.checked ? 'chiitoitsu' : 'standard';
-        state.isRon = elements.winRon.checked;
 
         if (state.handType === 'standard') {
             state.isPinfu = elements.isPinfu.checked;
@@ -207,14 +203,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 3. Core Calculation Functions ---
-    function calculateFu() {
+    function calculateFu(isRon) {
         const fuBreakdown = {
             base: 0,
             chiitoitsu: 0, // New field for chiitoitsu fu
             melds: [0, 0, 0, 0],
             pair: 0,
             wait: 0,
-            winMethod: 0,
+            winMethod: 0, // Retained for special case displays
             special: null, // To store text for special cases like "Chiitoitsu"
             unrounded: 0,
             rounded: 0
@@ -223,26 +219,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.handType === 'chiitoitsu') {
             fuBreakdown.special = '七対子';
             fuBreakdown.base = 20;
-            fuBreakdown.chiitoitsu = 5;
+            fuBreakdown.chiitoitsu = 5; // This is not real fu, but a special value for this hand
 
-            // Calculate fu for win method and wait type for display purposes, but don't add to total.
-            // Chiitoitsu is always a single wait (tanki).
-            fuBreakdown.wait = 2;
-            // Win method fu depends on Ron or Tsumo.
-            if (state.isRon) {
-                fuBreakdown.winMethod = 10;
+            // For display consistency, we can note the win method fu, though it doesn't count.
+            fuBreakdown.wait = 2; // Always tanki
+            if (isRon) {
+                fuBreakdown.winMethod = 10; // Menzen ron with chiitoitsu
             } else {
-                fuBreakdown.winMethod = 2;
+                fuBreakdown.winMethod = 2; // Tsumo
             }
 
-            fuBreakdown.unrounded = 25; // Total remains 25
-            fuBreakdown.rounded = 25;  // Total remains 25
+            fuBreakdown.unrounded = 25;
+            fuBreakdown.rounded = 25;
             return fuBreakdown;
         }
 
         // Tsumo Pinfu is a special case, fixed at 20 fu.
-        // The only fu awarded is the base 20 fu.
-        if (state.isPinfu && !state.isRon) {
+        if (state.isPinfu && !isRon) {
             fuBreakdown.special = '平和ツモ';
             fuBreakdown.base = 20;
             // All other fu components are 0. Tsumo fu is ignored.
@@ -255,11 +248,11 @@ document.addEventListener('DOMContentLoaded', () => {
         fuBreakdown.base = 20;
 
         // Win condition fu
-        if (state.isMenzen && state.isRon) {
+        if (state.isMenzen && isRon) {
             fuBreakdown.winMethod = 10;
             fu += 10;
         }
-        if (!state.isRon && !state.isPinfu) { // Tsumo win (but not for Pinfu)
+        if (!isRon && !state.isPinfu) { // Tsumo win (but not for Pinfu)
             fuBreakdown.winMethod = 2;
             fu += 2;
         }
@@ -296,21 +289,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return fuBreakdown;
     }
 
-    function calculateScore(han, fu) {
+    function calculateScore(han, fu, isOya) {
         if (han >= 13) return { name: "役満", oya: 48000, ko: 32000 };
         if (han >= 11) return { name: "三倍満", oya: 36000, ko: 24000 };
         if (han >= 8) return { name: "倍満", oya: 24000, ko: 16000 };
         if (han >= 6) return { name: "跳満", oya: 18000, ko: 12000 };
-        if (han >= 5 || (han === 4 && fu >= 30) || (han === 3 && fu >= 60)) {
+        if (han >= 5 || (han === 4 && fu >= 40) || (han === 3 && fu >= 70) || (han === 2 && fu >= 120)) { // Mangan conditions updated
              return { name: "満貫", oya: 12000, ko: 8000 };
         }
 
         const basePoints = fu * Math.pow(2, han + 2);
-        if (basePoints > 2000) return { name: "満貫", oya: 12000, ko: 8000 };
+        if (basePoints >= 2000) return { name: "満貫", oya: 12000, ko: 8000 };
 
         const roundUp100 = (val) => Math.ceil(val / 100) * 100;
 
-        if (state.isOya) {
+        if (isOya) {
             const ron = roundUp100(basePoints * 6);
             const tsumo = roundUp100(basePoints * 2);
             return { ron: ron, tsumo: `${tsumo} All`, raw: {ron, tsumo}};
@@ -324,33 +317,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 4. DOM Update Functions ---
-    function updateDisplay(fuBreakdown, score) {
-        elements.resultHanFu.textContent = `${state.han}飜 ${fuBreakdown.rounded}符`;
+    function updateDisplay(han, fu, ronScore, tsumoScore, isOya) {
+        elements.resultHanFu.textContent = `${han}飜 ${fu}符`;
 
-        let pointText;
-        if (score.name) {
-            // For limit hands, display the name and total points
-            const totalPoints = state.isOya ? score.oya : score.ko;
-            pointText = `${score.name} (${totalPoints}点)`;
+        // Display Ron score
+        let ronPointText = `${ronScore.ron}点`;
+        if (ronScore.name) {
+            const totalPoints = isOya ? ronScore.oya : ronScore.ko;
+            ronPointText = `${ronScore.name} (${totalPoints}点)`;
+        }
+        elements.resultPointsRon.textContent = ronPointText;
+
+        // Display Tsumo score
+        let tsumoPointText;
+        if (tsumoScore.name) {
+            const totalPoints = isOya ? tsumoScore.oya : tsumoScore.ko;
+            tsumoPointText = `${tsumoScore.name} (${totalPoints}点)`;
         } else {
-             if (state.isRon) {
-                // For Ron, just display the Ron score
-                pointText = `ロン: ${score.ron}点`;
+            let totalPoints;
+            if (isOya) {
+                totalPoints = tsumoScore.raw.tsumo * 3;
+                tsumoPointText = `${tsumoScore.tsumo} (${totalPoints}点)`;
             } else {
-                // For Tsumo, calculate and display the total
-                let totalPoints;
-                if (state.isOya) {
-                    // Oya tsumo: payment from each Ko player
-                    totalPoints = score.raw.tsumo * 3;
-                    pointText = `ツモ: ${score.tsumo} (${totalPoints}点)`;
-                } else {
-                    // Ko tsumo: payment from Oya and other Ko players
-                    totalPoints = score.raw.tsumoOya + (score.raw.tsumoKo * 2);
-                    pointText = `ツモ: ${score.tsumo} (${totalPoints}点)`;
-                }
+                totalPoints = tsumoScore.raw.tsumoOya + (tsumoScore.raw.tsumoKo * 2);
+                tsumoPointText = `${tsumoScore.tsumo} (${totalPoints}点)`;
             }
         }
-        elements.resultPoints.textContent = pointText;
+        elements.resultPointsTsumo.textContent = tsumoPointText;
     }
 
     function updateFuBreakdownUI(fuBreakdown) {
@@ -366,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- 2. Update text content of all fu displays ---
         elements.fuBase.textContent = base;
         elements.fuChiitoitsu.textContent = chiitoitsu;
-        elements.fuWinMethod.textContent = winMethod;
+        // fuWinMethod element is removed
         elements.fuWait.textContent = wait;
         elements.fuPair.textContent = pair;
         melds.forEach((meldFu, index) => {
@@ -381,20 +374,21 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.fuChiitoitsu.classList.add('fu-value-chiitoitsu');
 
             // Strike out all other fu components that don't apply
-            ['fu-win-method-row', 'fu-wait-row', 'fu-pair-row'].forEach(id => {
-                document.getElementById(id).classList.add('fu-strikethrough');
+            ['fu-wait-row', 'fu-pair-row'].forEach(id => {
+                const row = document.getElementById(id);
+                if (row) row.classList.add('fu-strikethrough');
             });
             document.querySelectorAll('.fu-meld-row').forEach(row => {
                 row.classList.add('fu-strikethrough');
             });
 
         } else if (special === '平和ツモ') {
-            // Only strike out the win method fu (tsumo fu)
-            document.getElementById('fu-win-method-row').classList.add('fu-strikethrough');
+            // Tsumo fu is ignored, but the row is gone, so no strikethrough needed.
         }
 
         // --- 4. Update the main fu value displays in the form ---
         const updateFuDisplay = (element, value, strikethrough = false) => {
+            if (!element) return; // Guard against missing elements
             element.classList.remove('fu-strikethrough-inline'); // Reset strikethrough
             if (value > 0) {
                 element.textContent = value;
@@ -409,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // For special hands, hide all individual fu displays on the form, with exceptions
         if (special === '七対子') {
-            updateFuDisplay(elements.winMethodFuValue, winMethod, true); // Show win method fu with strikethrough
+            // winMethodFuValue is removed
             updateFuDisplay(elements.waitFuValue, wait, true); // Show wait fu with strikethrough
             updateFuDisplay(elements.pairFuValue, 0); // Hide pair fu
             melds.forEach((meldFu, index) => {
@@ -418,7 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } else {
             const hideFormFu = (special === '平和ツモ');
-            updateFuDisplay(elements.winMethodFuValue, hideFormFu ? 0 : winMethod);
+            // winMethodFuValue is removed
             updateFuDisplay(elements.waitFuValue, hideFormFu ? 0 : wait);
             updateFuDisplay(elements.pairFuValue, hideFormFu ? 0 : pair);
             melds.forEach((meldFu, index) => {
@@ -447,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 5. Score Table Generation ---
-    function generateScoreTable() {
+    function generateScoreTable(isOya) {
         const fuHeaders = [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110];
         const hanHeaders = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
@@ -458,20 +452,18 @@ document.addEventListener('DOMContentLoaded', () => {
         hanHeaders.forEach(han => {
             html += `<tr><th>${han}飜</th>`;
             fuHeaders.forEach(fu => {
-                if (han === 1 && fu === 20 && state.isRon) {
+                 // Pinfu ron is not possible with 1 han 20 fu. But tsumo is. Table defaults to Ron.
+                if (han === 1 && fu === 20) {
                      html += `<td id="cell-${han}-${fu}">-</td>`;
                      return;
                 }
-                const score = calculateScore(han, fu);
+                const score = calculateScore(han, fu, isOya);
                 let displayScore;
                  if(score.name) {
-                    displayScore = state.isOya ? score.oya : score.ko;
+                    displayScore = isOya ? score.oya : score.ko;
                 } else {
-                    if (state.isRon) {
-                        displayScore = score.ron;
-                    } else {
-                        displayScore = state.isOya ? score.raw.tsumo * 3 : score.raw.tsumoOya + score.raw.tsumoKo * 2;
-                    }
+                    // Always display Ron score in the table
+                    displayScore = score.ron;
                 }
                 html += `<td id="cell-${han}-${fu}">${displayScore}</td>`;
             });
@@ -489,13 +481,30 @@ document.addEventListener('DOMContentLoaded', () => {
         updateState();
         updateHanButtons();
 
-        const fuBreakdown = calculateFu();
-        const score = calculateScore(state.han, fuBreakdown.rounded);
+        // Calculate for both Ron and Tsumo scenarios
+        const fuBreakdownRon = calculateFu(true); // isRon = true
+        const fuBreakdownTsumo = calculateFu(false); // isRon = false
 
-        updateDisplay(fuBreakdown, score);
-        updateFuBreakdownUI(fuBreakdown);
-        generateScoreTable();
-        highlightCell(state.han, fuBreakdown.rounded);
+        // Scores are calculated based on the Ron-case Fu, as it's the primary reference
+        // except for special cases like Tsumo Pinfu which has its own fu.
+        // We will display the fu from the Ron calculation by default.
+        // A special case: if the hand is Tsumo Pinfu, its fu is 20.
+        const displayFu = (state.isPinfu && !fuBreakdownTsumo.special) ? fuBreakdownTsumo.rounded : fuBreakdownRon.rounded;
+
+        const scoreRon = calculateScore(state.han, fuBreakdownRon.rounded, state.isOya);
+        const scoreTsumo = calculateScore(state.han, fuBreakdownTsumo.rounded, state.isOya);
+
+        // Update the display with both scores
+        updateDisplay(state.han, displayFu, scoreRon, scoreTsumo, state.isOya);
+
+        // Update the Fu breakdown display (using the Ron calculation as the base)
+        updateFuBreakdownUI(fuBreakdownRon);
+
+        // Generate the score table (based on Ron scores)
+        generateScoreTable(state.isOya);
+
+        // Highlight the relevant cell in the score table
+        highlightCell(state.han, displayFu);
     }
 
     function init() {
@@ -503,7 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const allControls = [
             elements.isKo, elements.isOya, elements.hanInput,
             elements.isChiitoitsu, elements.isPinfu, elements.isTanyao,
-            elements.winRon, elements.winTsumo, elements.waitType,
+            elements.waitType,
             elements.pairIsYakuhai,
             ...document.querySelectorAll('.meld-group input')
         ];

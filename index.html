@@ -174,16 +174,6 @@
                     </div>
                     <span class="fu-value-display" id="wait-fu-value"></span>
                 </div>
-                <div class="form-group fu-value-group setting-row">
-                     <div class="setting-label">
-                        <label>和了り方:</label>
-                    </div>
-                     <div class="setting-control">
-                        <input type="radio" id="win-ron" name="win-method" value="ron" checked> <label for="win-ron">ロン</label>
-                        <input type="radio" id="win-tsumo" name="win-method" value="tsumo"> <label for="win-tsumo">ツモ</label>
-                    </div>
-                    <span class="fu-value-display" id="win-method-fu-value"></span>
-                </div>
             </section>
 
             <section class="card">
@@ -192,7 +182,8 @@
                     <span class="fu-value-display fu-total-result-display" id="result-fu-total-display"></span>
                 </div>
                 <p>この手は: <strong id="result-han-fu">--飜 --符</strong> です。</p>
-                <p>点数: <strong id="result-points">----点</strong></p>
+                <p>ロン: <strong id="result-points-ron">----点</strong></p>
+                <p>ツモ: <strong id="result-points-tsumo">----点</strong></p>
             </section>
 
             <section class="card score-table-card">
@@ -212,10 +203,6 @@
                 <div class="fu-row" id="fu-chiitoitsu-row" style="display: none;">
                     <span class="fu-label">七対子</span>
                     <span class="fu-value" id="fu-chiitoitsu">0</span>
-                </div>
-                <div class="fu-row" id="fu-win-method-row">
-                    <span class="fu-label">和了り方</span>
-                    <span class="fu-value" id="fu-win-method">0</span>
                 </div>
                 <div class="fu-row fu-meld-row" id="fu-meld1-row">
                     <span class="fu-label">面子1</span>
