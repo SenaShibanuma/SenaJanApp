@@ -15,10 +15,12 @@
 ## 2. HTML設計 (`index.html`)
 - メインコンテンツを`<div class="input-area">`と`<div class="fu-breakdown-area">`に分割した2カラムレイアウトを基本とする。
 - 各設定項目（基本設定、手牌構成、詳細設定など）を`<section class="card">`で意味的に分割し、`input-area`内に配置する。
+- **計算結果表示:**
+  - 点数表示エリアは`<div class="result-score-container">`で囲み、その中に各点数（ロン、ツモ、面前ツモ）の項目を`<div class="result-score-item">`として配置する。
+  - 面前ツモの項目は`isMenzen`フラグに応じてJavaScriptで表示/非表示を切り替える。
 - **符の内訳表示:**
   - `fu-breakdown-area`内に、符計算の各項目のためのプレースホルダー要素を配置する。
   - `fu-breakdown-content`に通常の内訳を表示。
-  - `fu-special-content`に七対子専用の「25符」表示要素 (`.fu-chiitoitsu-display`) を配置し、通常は非表示にする。
 - **手牌構成:**
   - 「七対子」と「断幺九」のチェックボックスを`<fieldset>`の外に配置し、常に選択可能にする。
   - 「平和」チェックボックスは`<fieldset>`内に配置し、七対子選択時に無効化されるようにする。
@@ -37,23 +39,25 @@
   - **計算ロジック:** `calculateFu`, `calculateScore`が状態オブジェクトを元に計算のみを行う。
     - `calculateFu`: 特殊役（七対子、平和ツモ）の場合でも、`special`キーを含む完全な内訳オブジェクトを返すように修正。
   - **表示ロジック:** `updateDisplay`, `generateScoreTable`, `highlightCell`が計算結果を画面に描画する。
+    - `updateDisplay`: 3つの点数（ロン、ツモ、面前ツモ）を受け取り、対応するHTML要素に値を設定する。面前ツモは`isMenzen`フラグに基づいて表示を切り替える。
+    - `highlightCell`: 3つの点数に対応する点数表のセルIDを特定し、それぞれに`.highlight-ron`, `.highlight-tsumo`, `.highlight-menzen-tsumo`クラスを付与する。
     - `updateFuBreakdownUI`: `calculateFu`から返されたオブジェクトを元に、符の内訳表示エリアを更新する。
-      - **通常時:** 全ての符項目をそのまま表示する。
-      - **平和ツモ時:** 「和了り方」の行に `.fu-strikethrough` クラスを付与する。
-      - **七対子時:** 全ての通常項目に `.fu-strikethrough` クラスを付与し、`#fu-special-content` を表示する。
 - **初期化:** `init()`関数が全ての`input`イベントリスナーを設定する。
   - **排他制御:** `isChiitoitsu`と`isPinfu`に`change`イベントリスナーを追加し、一方がチェックされたらもう一方のチェックを外すことで、役の複合をUIレベルで防止する。
-- **メインループ:** `mainUpdate()`が上記関数群を呼び出し、UIの変更から再計算、再描画までの一連の流れを制御する。
+- **メインループ:** `mainUpdate()`が上記関数群を呼び出し、UIの変更から再計算、再描画までの一連の流れを制御する。`scoreTsumoMenzen`を計算し、表示ロジック関数に渡す役割を担う。
 
 ## 4. CSS設計 (`style.css`)
 - **レイアウト:**
   - `<table>` を使用して面子入力エリアを構成 (`.melds-table`)。
+  - `.result-score-container` をFlexboxでレイアウトし、点数表示を整理する。
 - **UI状態の可視化:**
   - **アクティブな役:** JSによって`.yaku-selector`に`.yaku-active`クラスが付与され、背景色を変更して選択状態を明確にする。
   - **非アクティブなUI:**
     - `fieldset.disabled`クラスで関連エリア全体を囲む。
     - `.option-disabled`クラス: `label`に`text-decoration: line-through`などを適用し、個別のオプションが無効であることを示す。
-    - `.fu-strikethrough`クラス: 符の内訳表示で、無視される項目に`text-decoration: line-through`を適用する。
+  - **点数表のハイライト:**
+    - `.highlight-ron`, `.highlight-tsumo`, `.highlight-menzen-tsumo`クラスを作成し、それぞれ異なる背景色を指定する。
+    - 2つのクラスが同一要素に付与された場合（例: `.highlight-ron.highlight-tsumo`）のために、`linear-gradient`を使用して2色表示を実現する。
 - **変数:** CSSカスタムプロパティでカラーテーマを管理し、一貫性を保つ。
 
 ## 5. UIの動的制御

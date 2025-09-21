@@ -530,3 +530,99 @@ hr {
     -webkit-appearance: none;
     margin: 0;
 }
+
+/* --- Result Score Display --- */
+.result-score-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.result-score-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    background-color: var(--disabled-bg-color);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease-in-out;
+}
+
+.result-score-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--subtle-text-color);
+}
+
+.result-score-value {
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+/* Specific colors for each score type */
+#result-ron-container {
+    background-color: rgba(220, 53, 69, 0.15); /* Reddish tint */
+    border-color: rgba(220, 53, 69, 0.4);
+}
+#result-ron-container .result-score-value {
+    color: #f89a9a;
+}
+
+
+#result-tsumo-container {
+    background-color: rgba(25, 135, 84, 0.15); /* Greenish tint */
+    border-color: rgba(25, 135, 84, 0.4);
+}
+#result-tsumo-container .result-score-value {
+    color: #82e0aa;
+}
+
+#result-menzen-tsumo-container {
+    background-color: rgba(13, 202, 240, 0.15); /* Bluish tint */
+    border-color: rgba(13, 202, 240, 0.4);
+}
+#result-menzen-tsumo-container .result-score-value {
+    color: #79d7f2;
+}
+
+#result-menzen-tsumo-container .result-score-label {
+    font-size: 0.95rem; /* Slightly smaller for the longer text */
+}
+
+/* --- Table Highlighting --- */
+.highlight {
+    background-color: var(--highlight-bg-color);
+    font-weight: bold;
+    color: #1a1a1a; /* Dark text on light highlight */
+}
+
+/* New multi-highlight styles */
+.highlight-ron, .highlight-tsumo, .highlight-menzen-tsumo {
+    font-weight: bold;
+    color: #fff !important; /* White text for dark highlights */
+    transition: background-color 0.3s ease;
+}
+
+.highlight-ron {
+    background-color: rgba(220, 53, 69, 0.7); /* Reddish */
+}
+.highlight-tsumo {
+    background-color: rgba(25, 135, 84, 0.7); /* Greenish */
+}
+.highlight-menzen-tsumo {
+    background-color: rgba(13, 202, 240, 0.7); /* Bluish */
+}
+
+/* Creative solution for overlapping highlights */
+.highlight-ron.highlight-tsumo {
+    background: linear-gradient(
+        135deg,
+        rgba(220, 53, 69, 0.7) 0%,
+        rgba(220, 53, 69, 0.7) 49%,
+        #fff 50%,
+        rgba(25, 135, 84, 0.7) 51%,
+        rgba(25, 135, 84, 0.7) 100%
+    );
+}
