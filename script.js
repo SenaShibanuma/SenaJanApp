@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fuMeld4: document.getElementById('fu-meld4'),
         fuPair: document.getElementById('fu-pair'),
         fuWait: document.getElementById('fu-wait'),
+        fuChiitoitsu: document.getElementById('fu-chiitoitsu'), // New element for chiitoitsu fu
         fuTotalUnrounded: document.getElementById('fu-total-unrounded'),
         fuTotalRounded: document.getElementById('fu-total-rounded'),
 
@@ -148,11 +149,16 @@ document.addEventListener('DOMContentLoaded', () => {
             shuntsuRadio.disabled = isPinfuMeldLock;
             koutsuRadio.disabled = isPinfuMeldLock;
             kantsuRadio.disabled = isPinfuMeldLock;
-            isOpenCheck.disabled = isPinfuMeldLock || isShuntsu; // Re-evaluate disabled state
+
+            // When Pinfu is active, the "Open" checkbox MUST be disabled and unchecked.
             if (isPinfuMeldLock) {
-                shuntsuRadio.checked = true;
-                isOpenCheck.checked = false;
-                openOptionCell.classList.remove('option-disabled'); // Pinfu is menzen, so this is not "disabled" visually
+                shuntsuRadio.checked = true; // Force shuntsu
+                isOpenCheck.checked = false; // Force closed
+                isOpenCheck.disabled = true; // Disable the checkbox itself
+                openOptionCell.classList.add('option-disabled'); // Apply visual disabled style
+            } else {
+                 // Re-evaluate disabled state only if Pinfu is NOT locking it.
+                isOpenCheck.disabled = isShuntsu;
             }
 
             // Tanyao forces non-yaochu. Pinfu also forces non-yaochu.
@@ -189,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateFu() {
         const fuBreakdown = {
             base: 0,
+            chiitoitsu: 0, // New field for chiitoitsu fu
             melds: [0, 0, 0, 0],
             pair: 0,
             wait: 0,
@@ -200,6 +207,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (state.handType === 'chiitoitsu') {
             fuBreakdown.special = '七対子';
+            fuBreakdown.base = 20; // Base fu is still counted
+            fuBreakdown.chiitoitsu = 5; // The "hand composition" fu is 5
             fuBreakdown.unrounded = 25; // Raw value is 25
             fuBreakdown.rounded = 25;  // No rounding up for chiitoitsu
             // All other fu components are 0, but we return them for display purposes
@@ -320,14 +329,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateFuBreakdownUI(fuBreakdown) {
-        const { base, melds, pair, wait, winMethod, special, unrounded, rounded } = fuBreakdown;
+        const { base, chiitoitsu, melds, pair, wait, winMethod, special, unrounded, rounded } = fuBreakdown;
 
-        // --- 1. Reset all strikethrough classes ---
+        // --- 1. Reset all dynamic styles ---
         const allFuRows = document.querySelectorAll('.fu-row');
         allFuRows.forEach(row => row.classList.remove('fu-strikethrough'));
+        document.getElementById('fu-chiitoitsu-row').style.display = 'none';
+        elements.fuSpecialContent.style.display = 'none'; // Hide old special content area
+        elements.fuChiitoitsu.classList.remove('fu-value-chiitoitsu');
+
 
         // --- 2. Update text content of all fu displays ---
         elements.fuBase.textContent = base;
+        elements.fuChiitoitsu.textContent = chiitoitsu;
         elements.fuWinMethod.textContent = winMethod;
         elements.fuWait.textContent = wait;
         elements.fuPair.textContent = pair;
@@ -336,23 +350,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (meldElement) meldElement.textContent = meldFu;
         });
 
-        // --- 3. Handle special cases by applying strikethrough ---
+        // --- 3. Apply special styling based on hand type ---
         if (special === '七対子') {
-            // Strike out all individual fu rows
-            allFuRows.forEach(row => {
-                // Exclude the special display itself if it's considered a .fu-row
-                if (!row.classList.contains('fu-chiitoitsu-display')) {
-                    row.classList.add('fu-strikethrough');
-                }
+            // Show the dedicated Chiitoitsu row and highlight its value
+            document.getElementById('fu-chiitoitsu-row').style.display = 'flex';
+            elements.fuChiitoitsu.classList.add('fu-value-chiitoitsu');
+
+            // Strike out all other fu components that don't apply
+            ['fu-win-method-row', 'fu-wait-row', 'fu-pair-row'].forEach(id => {
+                document.getElementById(id).classList.add('fu-strikethrough');
             });
-            elements.fuSpecialContent.style.display = 'block';
+            document.querySelectorAll('.fu-meld-row').forEach(row => {
+                row.classList.add('fu-strikethrough');
+            });
+
         } else if (special === '平和ツモ') {
             // Only strike out the win method fu (tsumo fu)
             document.getElementById('fu-win-method-row').classList.add('fu-strikethrough');
-            elements.fuSpecialContent.style.display = 'none';
-        } else {
-            // No special hand, ensure special content is hidden
-            elements.fuSpecialContent.style.display = 'none';
         }
 
         // --- 4. Update the main fu value displays in the form ---
