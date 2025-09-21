@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Hand Type
         isChiitoitsu: document.getElementById('is-chiitoitsu'),
+        chiitoitsuValueDisplay: document.getElementById('chiitoitsu-value-display'),
 
         // Standard Hand Fieldset
         standardHandFieldset: document.getElementById('standard-hand-fieldset'),
@@ -118,6 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isChiitoitsu && elements.isPinfu.checked) {
             elements.isPinfu.checked = false; // Ensure Pinfu is off
         }
+
+        // --- NEW: Show/hide Chiitoitsu fu value based on checkbox ---
+        elements.chiitoitsuValueDisplay.classList.toggle('visible', isChiitoitsu);
 
         // --- 2. Update visuals for global yaku ---
         updateYakuVisuals();
