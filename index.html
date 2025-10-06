@@ -200,6 +200,13 @@
 
             <section class="card score-table-card">
                 <h2>点数表</h2>
+                <div class="form-group">
+                    <label>表示モード:</label>
+                    <input type="radio" id="table-view-ron" name="table-view" value="ron" checked>
+                    <label for="table-view-ron">ロン基準</label>
+                    <input type="radio" id="table-view-tsumo" name="table-view" value="tsumo">
+                    <label for="table-view-tsumo">ツモ基準</label>
+                </div>
                 <table id="score-table">
                     <!-- JS will generate this -->
                 </table>
