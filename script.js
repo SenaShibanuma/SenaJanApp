@@ -332,8 +332,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 4. DOM Update Functions ---
-    function updateDisplay(han, fu, ronScore, tsumoScore, tsumoMenzenScore, isOya, isMenzen) {
-        elements.resultHanFu.textContent = `${han}飜 ${fu}符`;
+    function updateDisplay(han, fuRon, fuTsumo, ronScore, tsumoScore, tsumoMenzenScore, isOya, isMenzen) {
+        if (fuRon === fuTsumo) {
+            elements.resultHanFu.textContent = `${han}飜 ${fuRon}符`;
+        } else {
+            // New logic to show both fu values when they differ
+            elements.resultHanFu.textContent = `${han}飜 (ロン${fuRon}符 / ツモ${fuTsumo}符)`;
+        }
 
         // Helper to generate score text, now using the new score object structure
         const getPointText = (score, isTsumo) => {
@@ -460,33 +465,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    function highlightCell(han, fu, scoreRon, scoreTsumo, scoreTsumoMenzen) {
+    function highlightCell(han, fuRon, fuTsumo, scoreRon, scoreTsumo, scoreTsumoMenzen) {
         // Clear all previous highlights
         const allHighlighted = document.querySelectorAll('.highlight, .highlight-ron, .highlight-tsumo, .highlight-menzen-tsumo');
         allHighlighted.forEach(cell => {
             cell.classList.remove('highlight', 'highlight-ron', 'highlight-tsumo', 'highlight-menzen-tsumo');
         });
 
-        // Highlight for Ron and Tsumo (they share a cell in the Ron-based table)
-        const baseCellId = `cell-${han}-${fu}`;
-        const baseCell = document.getElementById(baseCellId);
-        if (baseCell) {
-            baseCell.classList.add('highlight-ron');
-            baseCell.classList.add('highlight-tsumo');
+        // Highlight for Ron
+        const ronCellId = `cell-${han}-${fuRon}`;
+        const ronCell = document.getElementById(ronCellId);
+        if (ronCell) {
+            ronCell.classList.add('highlight-ron');
         }
 
-        // Highlight for Menzen Tsumo (han + 1)
-        if (scoreTsumoMenzen) {
-            // Fu might be different for mangan, etc. We need to find the correct fu for the given han.
-            // For simplicity, we assume the table is consistent.
-            // Let's find the fu for the mangan threshold.
-            const hanMenzen = han + 1;
+        // Highlight for Tsumo
+        const tsumoCellId = `cell-${han}-${fuTsumo}`;
+        const tsumoCell = document.getElementById(tsumoCellId);
+        if (tsumoCell) {
+            tsumoCell.classList.add('highlight-tsumo');
+        }
 
-            // In the `calculateScore` function, 4 han 40 fu is mangan, 3 han 70 fu is mangan.
-            // This logic is complex. For now, let's assume the fu remains the same for highlighting.
-            // This is a simplification but should work for most cases.
+
+        // Highlight for Menzen Tsumo (han + 1), using the Tsumo fu
+        if (scoreTsumoMenzen) {
+            const hanMenzen = han + 1;
             // A more robust solution might need to parse the score name ('満貫') and find the first mangan cell in that row.
-            const menzenCellId = `cell-${hanMenzen}-${fu}`;
+            const menzenCellId = `cell-${hanMenzen}-${fuTsumo}`;
             const menzenCell = document.getElementById(menzenCellId);
             if (menzenCell) {
                 menzenCell.classList.add('highlight-menzen-tsumo');
@@ -548,18 +553,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const fuBreakdownRon = calculateFu(true); // isRon = true
         const fuBreakdownTsumo = calculateFu(false); // isRon = false
 
-        // Scores are calculated based on the Ron-case Fu, as it's the primary reference
-        // except for special cases like Tsumo Pinfu which has its own fu.
-        // We will display the fu from the Ron calculation by default.
-        // A special case: if the hand is Tsumo Pinfu, its fu is 20.
-        const displayFu = (state.isPinfu && !fuBreakdownTsumo.special) ? fuBreakdownTsumo.rounded : fuBreakdownRon.rounded;
-
         const scoreRon = calculateScore(state.han, fuBreakdownRon.rounded, state.isOya);
         const scoreTsumo = calculateScore(state.han, fuBreakdownTsumo.rounded, state.isOya);
         const scoreTsumoMenzen = state.isMenzen ? calculateScore(state.han + 1, fuBreakdownTsumo.rounded, state.isOya) : null;
 
         // Update the display with all three scores
-        updateDisplay(state.han, displayFu, scoreRon, scoreTsumo, scoreTsumoMenzen, state.isOya, state.isMenzen);
+        updateDisplay(state.han, fuBreakdownRon.rounded, fuBreakdownTsumo.rounded, scoreRon, scoreTsumo, scoreTsumoMenzen, state.isOya, state.isMenzen);
 
         // Update the Fu breakdown display (using the Ron calculation as the base)
         updateFuBreakdownUI(fuBreakdownRon);
@@ -568,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
         generateScoreTable(state.isOya, state.tableView);
 
         // Highlight the relevant cell in the score table
-        highlightCell(state.han, displayFu, scoreRon, scoreTsumo, scoreTsumoMenzen);
+        highlightCell(state.han, fuBreakdownRon.rounded, fuBreakdownTsumo.rounded, scoreRon, scoreTsumo, scoreTsumoMenzen);
     }
 
     function init() {
