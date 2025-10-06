@@ -472,18 +472,26 @@ document.addEventListener('DOMContentLoaded', () => {
             cell.classList.remove('highlight', 'highlight-ron', 'highlight-tsumo', 'highlight-menzen-tsumo');
         });
 
-        // Highlight for Ron
-        const ronCellId = `cell-${han}-${fuRon}`;
-        const ronCell = document.getElementById(ronCellId);
-        if (ronCell) {
-            ronCell.classList.add('highlight-ron');
-        }
+        if (fuRon === fuTsumo) {
+            // If Fu is the same, apply both classes to the same cell for a split highlight
+            const cellId = `cell-${han}-${fuRon}`;
+            const cell = document.getElementById(cellId);
+            if (cell) {
+                cell.classList.add('highlight-ron', 'highlight-tsumo');
+            }
+        } else {
+            // If Fu is different, highlight two separate cells
+            const ronCellId = `cell-${han}-${fuRon}`;
+            const ronCell = document.getElementById(ronCellId);
+            if (ronCell) {
+                ronCell.classList.add('highlight-ron');
+            }
 
-        // Highlight for Tsumo
-        const tsumoCellId = `cell-${han}-${fuTsumo}`;
-        const tsumoCell = document.getElementById(tsumoCellId);
-        if (tsumoCell) {
-            tsumoCell.classList.add('highlight-tsumo');
+            const tsumoCellId = `cell-${han}-${fuTsumo}`;
+            const tsumoCell = document.getElementById(tsumoCellId);
+            if (tsumoCell) {
+                tsumoCell.classList.add('highlight-tsumo');
+            }
         }
 
 
@@ -501,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 5. Score Table Generation ---
-    function generateScoreTable(isOya, viewType) {
+    function generateScoreTable(isOya, viewType, currentHan, fuRon, fuTsumo) {
         const fuHeaders = [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110];
         const hanHeaders = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
@@ -512,19 +520,21 @@ document.addEventListener('DOMContentLoaded', () => {
         hanHeaders.forEach(han => {
             html += `<tr><th>${han}飜</th>`;
             fuHeaders.forEach(fu => {
-                // In Tsumo mode, 1 han 20 fu is possible (Tsumo Pinfu).
-                if (viewType === 'ron' && han === 1 && fu === 20) {
-                     html += `<td id="cell-${han}-${fu}">-</td>`;
-                     return;
+                // Special case: In Ron view, if the Tsumo highlight needs this cell, calculate and show it.
+                const isSpecialTsumoCell = viewType === 'ron' && han === currentHan && fu === fuTsumo && fuRon !== fuTsumo;
+
+                // Standard invalid case for Ron view (1 han 20 fu for non-pinfu)
+                if (viewType === 'ron' && han === 1 && fu === 20 && !isSpecialTsumoCell) {
+                    html += `<td id="cell-${han}-${fu}">-</td>`;
+                    return;
                 }
 
                 const score = calculateScore(han, fu, isOya);
                 let displayScore;
 
                 if (score.name) {
-                    // For Mangan etc., the 'ron' field holds the total payout.
                     displayScore = score.ron;
-                } else if (viewType === 'tsumo') {
+                } else if (viewType === 'tsumo' || isSpecialTsumoCell) { // Use tsumo logic for the special cell
                     if (isOya) {
                         displayScore = score.tsumoKo * 3;
                     } else {
@@ -563,8 +573,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update the Fu breakdown display (using the Ron calculation as the base)
         updateFuBreakdownUI(fuBreakdownRon);
 
-        // Generate the score table
-        generateScoreTable(state.isOya, state.tableView);
+        // Generate the score table, passing in the calculated fu to handle special cases
+        generateScoreTable(state.isOya, state.tableView, state.han, fuBreakdownRon.rounded, fuBreakdownTsumo.rounded);
 
         // Highlight the relevant cell in the score table
         highlightCell(state.han, fuBreakdownRon.rounded, fuBreakdownTsumo.rounded, scoreRon, scoreTsumo, scoreTsumoMenzen);
