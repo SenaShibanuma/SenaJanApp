@@ -35,6 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
         resultPointsTsumoMenzen: document.getElementById('result-points-tsumo-menzen'),
         resultMenzenTsumoContainer: document.getElementById('result-menzen-tsumo-container'),
         scoreTable: document.getElementById('score-table'),
+        tableViewRon: document.getElementById('table-view-ron'),
+        tableViewTsumo: document.getElementById('table-view-tsumo'),
         resultFuTotalDisplay: document.getElementById('result-fu-total-display'),
 
         // Fu Breakdown
@@ -93,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.pair = {};
             state.melds = [];
         }
+        state.tableView = elements.tableViewRon.checked ? 'ron' : 'tsumo';
     }
 
     function updateYakuVisuals() {
@@ -292,28 +295,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculateScore(han, fu, isOya) {
-        if (han >= 13) return { name: "役満", oya: 48000, ko: 32000 };
-        if (han >= 11) return { name: "三倍満", oya: 36000, ko: 24000 };
-        if (han >= 8) return { name: "倍満", oya: 24000, ko: 16000 };
-        if (han >= 6) return { name: "跳満", oya: 18000, ko: 12000 };
-        if (han >= 5 || (han === 4 && fu >= 40) || (han === 3 && fu >= 70) || (han === 2 && fu >= 120)) { // Mangan conditions updated
-             return { name: "満貫", oya: 12000, ko: 8000 };
+        const getManganScore = (name, oyaScore, koScore) => ({
+            name,
+            ron: isOya ? oyaScore : koScore,
+            tsumoKo: isOya ? Math.ceil(oyaScore / 3 / 100) * 100 : Math.ceil(koScore / 4 / 100) * 100,
+            tsumoOya: isOya ? Math.ceil(oyaScore / 3 / 100) * 100 : Math.ceil(koScore / 2 / 100) * 100,
+        });
+
+        if (han >= 13) return getManganScore("役満", 48000, 32000);
+        if (han >= 11) return getManganScore("三倍満", 36000, 24000);
+        if (han >= 8) return getManganScore("倍満", 24000, 16000);
+        if (han >= 6) return getManganScore("跳満", 18000, 12000);
+        if (han >= 5 || (han === 4 && fu >= 40) || (han === 3 && fu >= 70) || (han === 2 && fu >= 120)) {
+             return getManganScore("満貫", 12000, 8000);
         }
 
         const basePoints = fu * Math.pow(2, han + 2);
-        if (basePoints >= 2000) return { name: "満貫", oya: 12000, ko: 8000 };
+        if (basePoints >= 2000) return getManganScore("満貫", 12000, 8000);
 
         const roundUp100 = (val) => Math.ceil(val / 100) * 100;
 
         if (isOya) {
-            const ron = roundUp100(basePoints * 6);
-            const tsumo = roundUp100(basePoints * 2);
-            return { ron: ron, tsumo: `${tsumo} All`, raw: {ron, tsumo}};
+            return {
+                ron: roundUp100(basePoints * 6),
+                tsumoKo: roundUp100(basePoints * 2), // Tsumo payment per player
+                tsumoOya: roundUp100(basePoints * 2)
+            };
         } else {
-            const ron = roundUp100(basePoints * 4);
-            const tsumoOya = roundUp100(basePoints * 2);
-            const tsumoKo = roundUp100(basePoints * 1);
-            return { ron: ron, tsumo: `${tsumoOya} / ${tsumoKo}`, raw: {ron, tsumoOya, tsumoKo} };
+            return {
+                ron: roundUp100(basePoints * 4),
+                tsumoKo: roundUp100(basePoints * 1), // Payment from other non-dealers
+                tsumoOya: roundUp100(basePoints * 2)  // Payment from dealer
+            };
         }
     }
 
@@ -322,23 +335,31 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateDisplay(han, fu, ronScore, tsumoScore, tsumoMenzenScore, isOya, isMenzen) {
         elements.resultHanFu.textContent = `${han}飜 ${fu}符`;
 
-        // Helper to generate score text
+        // Helper to generate score text, now using the new score object structure
         const getPointText = (score, isTsumo) => {
             if (!score) return 'N/A';
+
+            // For named scores (Mangan, etc.), display the name and total points.
+            // The `ron` property holds the correct total for both Ron and Tsumo in this case.
             if (score.name) {
-                const totalPoints = isOya ? score.oya : score.ko;
-                return `${score.name} (${totalPoints}点)`;
+                return `${score.name} (${score.ron}点)`;
             }
+
+            // For regular scores
             if (isTsumo) {
                 let totalPoints;
-                 if (isOya) {
-                    totalPoints = score.raw.tsumo * 3;
-                    return `${score.tsumo} (${totalPoints}点)`;
+                let displayString;
+                if (isOya) {
+                    totalPoints = score.tsumoKo * 3;
+                    displayString = `${score.tsumoKo} All`;
                 } else {
-                    totalPoints = score.raw.tsumoOya + (score.raw.tsumoKo * 2);
-                    return `${score.tsumo} (${totalPoints}点)`;
+                    totalPoints = score.tsumoOya + (score.tsumoKo * 2);
+                    displayString = `${score.tsumoOya} / ${score.tsumoKo}`;
                 }
+                return `${displayString} (${totalPoints}点)`;
             }
+
+            // Default to Ron score display
             return `${score.ron}点`;
         };
 
@@ -475,7 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 5. Score Table Generation ---
-    function generateScoreTable(isOya) {
+    function generateScoreTable(isOya, viewType) {
         const fuHeaders = [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110];
         const hanHeaders = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
@@ -486,17 +507,25 @@ document.addEventListener('DOMContentLoaded', () => {
         hanHeaders.forEach(han => {
             html += `<tr><th>${han}飜</th>`;
             fuHeaders.forEach(fu => {
-                 // Pinfu ron is not possible with 1 han 20 fu. But tsumo is. Table defaults to Ron.
-                if (han === 1 && fu === 20) {
+                // In Tsumo mode, 1 han 20 fu is possible (Tsumo Pinfu).
+                if (viewType === 'ron' && han === 1 && fu === 20) {
                      html += `<td id="cell-${han}-${fu}">-</td>`;
                      return;
                 }
+
                 const score = calculateScore(han, fu, isOya);
                 let displayScore;
-                 if(score.name) {
-                    displayScore = isOya ? score.oya : score.ko;
-                } else {
-                    // Always display Ron score in the table
+
+                if (score.name) {
+                    // For Mangan etc., the 'ron' field holds the total payout.
+                    displayScore = score.ron;
+                } else if (viewType === 'tsumo') {
+                    if (isOya) {
+                        displayScore = score.tsumoKo * 3;
+                    } else {
+                        displayScore = score.tsumoOya + (score.tsumoKo * 2);
+                    }
+                } else { // 'ron'
                     displayScore = score.ron;
                 }
                 html += `<td id="cell-${han}-${fu}">${displayScore}</td>`;
@@ -535,8 +564,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update the Fu breakdown display (using the Ron calculation as the base)
         updateFuBreakdownUI(fuBreakdownRon);
 
-        // Generate the score table (based on Ron scores)
-        generateScoreTable(state.isOya);
+        // Generate the score table
+        generateScoreTable(state.isOya, state.tableView);
 
         // Highlight the relevant cell in the score table
         highlightCell(state.han, displayFu, scoreRon, scoreTsumo, scoreTsumoMenzen);
@@ -549,6 +578,8 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.isChiitoitsu, elements.isPinfu, elements.isTanyao,
             elements.waitType,
             elements.pairIsYakuhai,
+            elements.tableViewRon,
+            elements.tableViewTsumo,
             ...document.querySelectorAll('.meld-group input')
         ];
 
