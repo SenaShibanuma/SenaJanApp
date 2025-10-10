@@ -332,12 +332,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 4. DOM Update Functions ---
-    function updateDisplay(han, fuRon, fuTsumo, ronScore, tsumoScore, tsumoMenzenScore, isOya, isMenzen) {
-        if (fuRon === fuTsumo) {
-            elements.resultHanFu.textContent = `${han}飜 ${fuRon}符`;
+    function updateDisplay(han, fuBreakdownRon, fuBreakdownTsumo, ronScore, tsumoScore, tsumoMenzenScore, isOya, isMenzen) {
+        // Helper to generate the text for Fu, including the unrounded value if applicable.
+        const createFuText = (fuBreakdown) => {
+            const { rounded, unrounded } = fuBreakdown;
+            // Don't show "(切り上げ前...)" if rounding isn't needed or for special fu values.
+            if (rounded === unrounded || [20, 25].includes(rounded)) {
+                return `${rounded}符`;
+            }
+            return `${rounded}符 (切り上げ前: ${unrounded}符)`;
+        };
+
+        const ronText = createFuText(fuBreakdownRon);
+        const tsumoText = createFuText(fuBreakdownTsumo);
+
+        if (ronText === tsumoText) {
+            elements.resultHanFu.textContent = `${han}飜 ${ronText}`;
         } else {
-            // New logic to show both fu values when they differ
-            elements.resultHanFu.textContent = `${han}飜 (ロン${fuRon}符 / ツモ${fuTsumo}符)`;
+            elements.resultHanFu.textContent = `${han}飜 (ロン${ronText} / ツモ${tsumoText})`;
         }
 
         // Helper to generate score text, now using the new score object structure
@@ -345,7 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!score) return 'N/A';
 
             // For named scores (Mangan, etc.), display the name and total points.
-            // The `ron` property holds the correct total for both Ron and Tsumo in this case.
             if (score.name) {
                 return `${score.name} (${score.ron}点)`;
             }
@@ -549,19 +560,31 @@ document.addEventListener('DOMContentLoaded', () => {
         updateState();
         updateHanButtons();
 
-        // Calculate for both Ron and Tsumo scenarios
-        const fuBreakdownRon = calculateFu(true); // isRon = true
+        // --- New Fu Calculation Logic based on user request ---
+        // 1. Calculate Tsumo fu first, as it's the base for the custom rule.
         const fuBreakdownTsumo = calculateFu(false); // isRon = false
+
+        let fuBreakdownRon;
+        // 2. Derive Ron fu. Special hands like Chiitoitsu and Pinfu are not affected by the custom rule.
+        if (state.handType === 'chiitoitsu' || state.isPinfu) {
+            fuBreakdownRon = calculateFu(true);
+        } else {
+            // For all other hands, apply the custom rule: Ron fu (unrounded) = Tsumo fu (unrounded) + 2.
+            fuBreakdownRon = JSON.parse(JSON.stringify(fuBreakdownTsumo)); // Deep copy
+            fuBreakdownRon.unrounded = fuBreakdownTsumo.unrounded + 2;
+            fuBreakdownRon.rounded = (fuBreakdownRon.unrounded === 25) ? 25 : Math.ceil(fuBreakdownRon.unrounded / 10) * 10;
+        }
 
         const scoreRon = calculateScore(state.han, fuBreakdownRon.rounded, state.isOya);
         const scoreTsumo = calculateScore(state.han, fuBreakdownTsumo.rounded, state.isOya);
-        const scoreTsumoMenzen = state.isMenzen ? calculateScore(state.han + 1, fuBreakdownTsumo.rounded, state.isOya) : null;
+        // Per user request, menzen tsumo score is based on ron's han + 1 and ron's fu.
+        const scoreTsumoMenzen = state.isMenzen ? calculateScore(state.han + 1, fuBreakdownRon.rounded, state.isOya) : null;
 
         // Update the display with all three scores
-        updateDisplay(state.han, fuBreakdownRon.rounded, fuBreakdownTsumo.rounded, scoreRon, scoreTsumo, scoreTsumoMenzen, state.isOya, state.isMenzen);
+        updateDisplay(state.han, fuBreakdownRon, fuBreakdownTsumo, scoreRon, scoreTsumo, scoreTsumoMenzen, state.isOya, state.isMenzen);
 
-        // Update the Fu breakdown display (using the Ron calculation as the base)
-        updateFuBreakdownUI(fuBreakdownRon);
+        // Update the Fu breakdown display (using the Tsumo calculation as the base)
+        updateFuBreakdownUI(fuBreakdownTsumo);
 
         // Generate the score table
         generateScoreTable(state.isOya, state.tableView);
