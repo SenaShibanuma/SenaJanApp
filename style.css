@@ -542,7 +542,7 @@ hr {
 .result-score-item {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: center; /* Revert to center for vertical alignment */
     padding: 0.75rem 1rem;
     border-radius: 8px;
     background-color: var(--disabled-bg-color);
@@ -554,11 +554,22 @@ hr {
     font-size: 1rem;
     font-weight: 600;
     color: var(--subtle-text-color);
+    flex-grow: 1; /* Allow label to take up space */
+    flex-shrink: 1;
+}
+
+.fu-rounding-display {
+    font-size: 1rem;
+    font-weight: normal;
+    color: var(--subtle-text-color);
+    margin: 0 0.5rem;
+    flex-shrink: 0; /* Don't shrink */
 }
 
 .result-score-value {
     font-size: 1.4rem;
     font-weight: bold;
+    flex-shrink: 0; /* Don't shrink the score value */
 }
 
 /* Specific colors for each score type */
