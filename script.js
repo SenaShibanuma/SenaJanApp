@@ -33,6 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
         resultPointsRon: document.getElementById('result-points-ron'),
         resultPointsTsumo: document.getElementById('result-points-tsumo'),
         resultPointsTsumoMenzen: document.getElementById('result-points-tsumo-menzen'),
+        ronFuRounding: document.getElementById('ron-fu-rounding'),
+        tsumoFuRounding: document.getElementById('tsumo-fu-rounding'),
+        menzenTsumoFuRounding: document.getElementById('menzen-tsumo-fu-rounding'),
         resultMenzenTsumoContainer: document.getElementById('result-menzen-tsumo-container'),
         scoreTable: document.getElementById('score-table'),
         tableViewRon: document.getElementById('table-view-ron'),
@@ -343,6 +346,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return `${rounded}符 (切り上げ前: ${unrounded}符)`;
         };
 
+        // Helper to generate the rounding display text (e.g., "32→40符")
+        const createFuRoundingText = (fuBreakdown) => {
+            const { unrounded, rounded } = fuBreakdown;
+            if (unrounded !== rounded && ![20, 25].includes(rounded)) {
+                return `${unrounded}→${rounded}`;
+            }
+            return ''; // Return empty string if no rounding occurred
+        };
+
         const ronText = createFuText(fuBreakdownRon);
         const tsumoText = createFuText(fuBreakdownTsumo);
 
@@ -351,6 +363,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             elements.resultHanFu.textContent = `${han}飜 (ロン${ronText} / ツモ${tsumoText})`;
         }
+
+        // Update the new rounding displays
+        elements.ronFuRounding.textContent = createFuRoundingText(fuBreakdownRon);
+        elements.tsumoFuRounding.textContent = createFuRoundingText(fuBreakdownTsumo);
+        // Menzen Tsumo uses Ron's fu calculation
+        elements.menzenTsumoFuRounding.textContent = createFuRoundingText(fuBreakdownRon);
+
 
         // Helper to generate score text, now using the new score object structure
         const getPointText = (score, isTsumo) => {
