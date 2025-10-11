@@ -593,8 +593,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update the display with all three scores
         updateDisplay(state.han, fuBreakdownRon, fuBreakdownTsumo, scoreRon, scoreTsumo, scoreTsumoMenzen, state.isOya, state.isMenzen);
 
-        // Update the Fu breakdown display (using the Tsumo calculation as the base)
-        updateFuBreakdownUI(fuBreakdownTsumo);
+        // Update the Fu breakdown display based on the selected table view
+        updateFuBreakdownUI(state.tableView === 'ron' ? fuBreakdownRon : fuBreakdownTsumo);
 
         // Generate the score table
         generateScoreTable(state.isOya, state.tableView);
