@@ -1,5 +1,16 @@
+/**
+ * @file 麻雀点数計算アプリの主要なロジックを実装するスクリプトです。
+ * ユーザーの入力に基づいてハン（飜）と符を計算し、点数を表示します。
+ * また、インタラクティブな点数表の生成とハイライトも行います。
+ * このスクリプトは、外部ライブラリに依存せず、標準のWeb APIのみで動作します。
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- 1. DOM Element Selection ---
+    /**
+     * アプリケーションで使用されるDOM要素のコレクション。
+     * @type {Object.<string, HTMLElement|NodeListOf<HTMLElement>>}
+     */
     const elements = {
         // Basic settings
         isKo: document.getElementById('is-ko'),
@@ -66,8 +77,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 2. State Management & UI Logic ---
+    /**
+     * アプリケーションの現在の状態を保持するオブジェクト。
+     * @type {object}
+     */
     const state = {};
 
+    /**
+     * UIの入力値から最新の状態を読み取り、`state`オブジェクトを更新します。
+     * 手の種類（通常手、七対子）に応じて、関連する状態を整理します。
+     */
     function updateState() {
         state.isOya = elements.isOya.checked;
         state.han = parseInt(elements.hanInput.value, 10) || 0;
@@ -101,17 +120,30 @@ document.addEventListener('DOMContentLoaded', () => {
         state.tableView = elements.tableViewRon.checked ? 'ron' : 'tsumo';
     }
 
+    /**
+     * 選択された役（七対子、タンヤオ、平和）に応じて、
+     * UIの見た目を更新（アクティブ状態のCSSクラスを切り替え）します。
+     */
     function updateYakuVisuals() {
         elements.isChiitoitsu.closest('.yaku-selector')?.classList.toggle('yaku-active', elements.isChiitoitsu.checked);
         elements.isTanyao.closest('.yaku-selector')?.classList.toggle('yaku-active', elements.isTanyao.checked);
         elements.isPinfu.closest('.yaku-selector')?.classList.toggle('yaku-active', elements.isPinfu.checked);
     }
 
+    /**
+     * ハン数の入力値に基づいて、ハン数減少ボタン（-）の有効/無効状態を切り替えます。
+     * ハン数が1以下の場合は無効化されます。
+     */
     function updateHanButtons() {
         const han = parseInt(elements.hanInput.value, 10);
         elements.hanMinus.disabled = han <= 1;
     }
 
+    /**
+     * 選択された役の組み合わせに基づいて、各入力コントロールの有効/無効状態を制御します。
+     * 例えば、平和が選択された場合は面子の種類を順子に固定し、七対子が選択された場合は
+     * 通常手の入力フィールドを無効化します。
+     */
     function updateControlStates() {
         const isChiitoitsu = elements.isChiitoitsu.checked;
         const isPinfu = elements.isPinfu.checked;
@@ -201,6 +233,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 3. Core Calculation Functions ---
+    /**
+     * 手牌の内容に基づいて符を計算します。
+     * 七対子や平和などの特殊な役の符計算にも対応しています。
+     * @param {boolean} isRon ロン和了の場合はtrue、ツモ和了の場合はfalse。
+     * @returns {{
+     *   base: number,
+     *   chiitoitsu: number,
+     *   melds: number[],
+     *   pair: number,
+     *   wait: number,
+     *   winMethod: number,
+     *   special: string|null,
+     *   unrounded: number,
+     *   rounded: number
+     * }} 符の計算内訳と、切り上げ前後の合計符を含むオブジェクト。
+     */
     function calculateFu(isRon) {
         const fuBreakdown = {
             base: 0,
@@ -296,6 +344,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return fuBreakdown;
     }
 
+    /**
+     * ハンと符、親か子かに基づいて最終的な点数を計算します。
+     * 満貫、跳満、倍満、三倍満、役満などのリミットハンド（上限点数）にも対応しています。
+     * @param {number} han 和了のハン数。
+     * @param {number} fu 切り上げ済みの符。
+     * @param {boolean} isOya 親の場合はtrue、子の場合はfalse。
+     * @returns {{
+     *   name?: string,
+     *   ron: number,
+     *   tsumoKo: number,
+     *   tsumoOya: number
+     * }} 計算された点数情報を含むオブジェクト。リミットハンドの場合は`name`プロパティが含まれます。
+     */
     function calculateScore(han, fu, isOya) {
         const getManganScore = (name, oyaScore, koScore) => ({
             name,
@@ -334,6 +395,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 4. DOM Update Functions ---
+    /**
+     * 計算結果をUIに表示します。ハン・符、ロン・ツモの点数、面前ツモの点数などを更新します。
+     * ロンとツモで符が異なる場合の表示にも対応します。
+     * @param {number} han ハン数。
+     * @param {object} fuBreakdownRon ロン和了時の符計算内訳。
+     * @param {object} fuBreakdownTsumo ツモ和了時の符計算内訳。
+     * @param {object} ronScore ロン和了時の点数オブジェクト。
+     * @param {object} tsumoScore ツモ和了時の点数オブジェクト。
+     * @param {object|null} tsumoMenzenScore 面前ツモ時の点数オブジェクト。面前でない場合はnull。
+     * @param {boolean} isOya 親の場合はtrue。
+     * @param {boolean} isMenzen 面前の場合はtrue。
+     */
     function updateDisplay(han, fuBreakdownRon, fuBreakdownTsumo, ronScore, tsumoScore, tsumoMenzenScore, isOya, isMenzen) {
         // Helper to generate the text for Fu, including the unrounded value if applicable.
         const createFuText = (fuBreakdown) => {
@@ -412,6 +485,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    /**
+     * 符計算の内訳を表示するUIを更新します。
+     * 役（七対子など）に応じて、適用されない符の項目を打ち消し線で示すなどの処理を行います。
+     * @param {object} fuBreakdown 表示する符の計算内訳オブジェクト。
+     */
     function updateFuBreakdownUI(fuBreakdown) {
         const { base, chiitoitsu, melds, pair, wait, winMethod, special, unrounded, rounded } = fuBreakdown;
 
@@ -494,6 +572,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+    /**
+     * 計算結果に対応する点数表のセルをハイライトします。
+     * ロン、ツモ、面前ツモのセルをそれぞれ異なるスタイルで強調表示します。
+     * @param {number} han ハン数。
+     * @param {number} fuRon ロン和了時の符。
+     * @param {number} fuTsumo ツモ和了時の符。
+     * @param {object} scoreRon ロン和了時の点数オブジェクト。
+     * @param {object} scoreTsumo ツモ和了時の点数オブジェクト。
+     * @param {object|null} scoreTsumoMenzen 面前ツモ時の点数オブジェクト。
+     */
     function highlightCell(han, fuRon, fuTsumo, scoreRon, scoreTsumo, scoreTsumoMenzen) {
         // Clear all previous highlights
         const allHighlighted = document.querySelectorAll('.highlight, .highlight-ron, .highlight-tsumo, .highlight-menzen-tsumo');
@@ -530,6 +618,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 5. Score Table Generation ---
+    /**
+     * 点数表のHTMLを動的に生成します。
+     * 親/子、およびロン/ツモの表示モードに応じて内容を切り替えます。
+     * @param {boolean} isOya 親の場合はtrue。
+     * @param {'ron'|'tsumo'} viewType 表示モード。「ron」または「tsumo」。
+     */
     function generateScoreTable(isOya, viewType) {
         const fuHeaders = [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110];
         const hanHeaders = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
@@ -573,6 +667,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 6. Main Update & Initialization ---
+    /**
+     * アプリケーションのメイン更新関数。
+     * 状態の更新、計算、UI表示の更新を統括して実行します。
+     * ユーザー入力があるたびに呼び出されます。
+     */
     function mainUpdate() {
         updateControlStates();
         updateState();
@@ -603,6 +702,11 @@ document.addEventListener('DOMContentLoaded', () => {
         highlightCell(state.han, fuBreakdownRon.rounded, fuBreakdownTsumo.rounded, scoreRon, scoreTsumo, scoreTsumoMenzen);
     }
 
+    /**
+     * アプリケーションを初期化します。
+     * すべての入力コントロールにイベントリスナーを設定し、
+     * 初期表示のための`mainUpdate`を呼び出します。
+     */
     function init() {
         // Create a single list of all controls that trigger a recalculation
         const allControls = [

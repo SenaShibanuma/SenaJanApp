@@ -11,14 +11,21 @@
 </head>
 <body>
 
+    <!-- ===== ヘッダー ===== -->
     <header>
         <h1>麻雀 点数計算</h1>
     </header>
 
+    <!-- ===== メインコンテンツ ===== -->
     <main class="container">
+
+        <!-- ===== 左側: 入力エリア ===== -->
         <div class="input-area">
+
+            <!-- 1. 基本設定セクション -->
             <section class="card">
                 <h2>基本設定</h2>
+                <!-- 親/子の選択 -->
                 <div class="form-group">
                     <label>親/子:</label>
                     <input type="radio" id="is-ko" name="player-type" value="ko" checked>
@@ -26,6 +33,7 @@
                     <input type="radio" id="is-oya" name="player-type" value="oya">
                     <label for="is-oya">親</label>
                 </div>
+                <!-- 飜数入力 -->
                 <div class="form-group">
                     <label for="han-input">飜数:</label>
                     <div class="han-input-container">
@@ -36,12 +44,14 @@
                 </div>
             </section>
 
+            <!-- 2. 手牌の構成セクション -->
             <section class="card">
                 <div class="section-header">
                     <h2>手牌の構成</h2>
                     <span class="fu-value-display fu-base-display visible">20</span>
                 </div>
 
+                <!-- 特殊役（七対子、タンヤオ） -->
                 <div class="form-group">
                     <input type="checkbox" id="is-chiitoitsu">
                     <label for="is-chiitoitsu">七対子 (チートイツ)</label>
@@ -54,6 +64,7 @@
                     </div>
                 </div>
 
+                <!-- 通常手（平和、面子、雀頭）の入力エリア -->
                 <fieldset id="standard-hand-fieldset">
                     <div class="form-group global-modifiers">
                         <div class="yaku-selector">
@@ -62,6 +73,7 @@
                         </div>
                     </div>
 
+                    <!-- 面子（メンツ）の構成 -->
                     <div class="melds-container">
                         <table class="melds-table">
                             <thead>
@@ -74,7 +86,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Meld 1 -->
+                                <!-- 4つの面子入力 -->
                                 <tr class="meld-group" data-meld-id="1">
                                     <td>面子1</td>
                                     <td class="meld-type">
@@ -90,7 +102,6 @@
                                     </td>
                                     <td><span class="fu-value-display" id="meld1-fu-value"></span></td>
                                 </tr>
-                                <!-- Meld 2 -->
                                 <tr class="meld-group" data-meld-id="2">
                                     <td>面子2</td>
                                     <td class="meld-type">
@@ -106,7 +117,6 @@
                                     </td>
                                     <td><span class="fu-value-display" id="meld2-fu-value"></span></td>
                                 </tr>
-                                <!-- Meld 3 -->
                                 <tr class="meld-group" data-meld-id="3">
                                     <td>面子3</td>
                                     <td class="meld-type">
@@ -122,7 +132,6 @@
                                     </td>
                                     <td><span class="fu-value-display" id="meld3-fu-value"></span></td>
                                 </tr>
-                                <!-- Meld 4 -->
                                 <tr class="meld-group" data-meld-id="4">
                                     <td>面子4</td>
                                     <td class="meld-type">
@@ -141,7 +150,7 @@
                             </tbody>
                         </table>
 
-                        <!-- Pair -->
+                        <!-- 雀頭（ジャントウ）の構成 -->
                         <div class="pair-group">
                             <div class="meld-header">
                                 <span class="pair-label">雀頭</span>
@@ -157,8 +166,10 @@
                 </fieldset>
             </section>
 
+            <!-- 3. 詳細設定セクション -->
             <section class="card">
                 <h2>詳細設定</h2>
+                <!-- 待ち方の選択 -->
                 <div class="form-group fu-value-group setting-row">
                     <div class="setting-label">
                         <label>待ち方:</label>
@@ -176,12 +187,14 @@
                 </div>
             </section>
 
+            <!-- 4. 計算結果表示セクション -->
             <section class="card">
                 <div class="section-header">
                     <h2>計算結果</h2>
                     <span class="fu-value-display fu-total-result-display" id="result-fu-total-display"></span>
                 </div>
                 <p>この手は: <strong id="result-han-fu">--飜 --符</strong> です。</p>
+                <!-- ロン、ツモ、面前ツモの点数表示 -->
                 <div class="result-score-container">
                     <div class="result-score-item" id="result-ron-container">
                         <span class="result-score-label">ロン</br></span>
@@ -201,6 +214,7 @@
                 </div>
             </section>
 
+            <!-- 5. 点数表セクション -->
             <section class="card score-table-card">
                 <h2>点数表</h2>
                 <div class="form-group">
@@ -210,13 +224,17 @@
                     <input type="radio" id="table-view-tsumo" name="table-view" value="tsumo">
                     <label for="table-view-tsumo">ツモ基準</label>
                 </div>
+                <!-- 点数表はJavaScriptによって動的に生成される -->
                 <table id="score-table">
                     <!-- JS will generate this -->
                 </table>
             </section>
         </div>
+
+        <!-- ===== 右側: 符の内訳エリア ===== -->
         <div class="fu-breakdown-area">
             <h2>符の内訳</h2>
+            <!-- 符の各要素（符底、面子、雀頭など）を表示 -->
             <div id="fu-breakdown-content">
                 <div class="fu-row" id="fu-base-row">
                     <span class="fu-label">符底 (フーテイ)</span>
@@ -252,6 +270,7 @@
                 </div>
             </div>
             <hr>
+            <!-- 符の合計（切り上げ前と後） -->
             <div class="fu-total-row">
                 <span class="fu-label">合計 (切り上げ前)</span>
                 <span class="fu-value" id="fu-total-unrounded">20</span>
@@ -264,10 +283,12 @@
         </div>
     </main>
 
+    <!-- ===== フッター ===== -->
     <footer>
         <p>Built by Jules the Pirate Engineer 🏴‍☠️</p>
     </footer>
 
+    <!-- スクリプトの読み込み -->
     <script src="script.js"></script>
 </body>
 </html>
