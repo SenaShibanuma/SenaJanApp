@@ -366,8 +366,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update the new rounding displays
         elements.ronFuRounding.textContent = createFuRoundingText(fuBreakdownRon);
         elements.tsumoFuRounding.textContent = createFuRoundingText(fuBreakdownTsumo);
-        // Menzen Tsumo uses Ron's fu calculation
-        elements.menzenTsumoFuRounding.textContent = createFuRoundingText(fuBreakdownRon);
+        // Menzen Tsumo uses Tsumo's fu calculation.
+        elements.menzenTsumoFuRounding.textContent = createFuRoundingText(fuBreakdownTsumo);
 
 
         // Helper to generate score text, now using the new score object structure
@@ -587,8 +587,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const scoreRon = calculateScore(state.han, fuBreakdownRon.rounded, state.isOya);
         const scoreTsumo = calculateScore(state.han, fuBreakdownTsumo.rounded, state.isOya);
-        // Per user request, menzen tsumo score is based on ron's han + 1 and ron's fu.
-        const scoreTsumoMenzen = state.isMenzen ? calculateScore(state.han + 1, fuBreakdownRon.rounded, state.isOya) : null;
+        // Menzen tsumo score is based on han + 1 and tsumo's fu.
+        const scoreTsumoMenzen = state.isMenzen ? calculateScore(state.han + 1, fuBreakdownTsumo.rounded, state.isOya) : null;
 
         // Update the display with all three scores
         updateDisplay(state.han, fuBreakdownRon, fuBreakdownTsumo, scoreRon, scoreTsumo, scoreTsumoMenzen, state.isOya, state.isMenzen);
