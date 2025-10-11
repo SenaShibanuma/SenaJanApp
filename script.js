@@ -141,53 +141,43 @@ document.addEventListener('DOMContentLoaded', () => {
             const openOptionCell = isOpenCheck.closest('.meld-options');
             const yaochuOptionCell = isYaochuCheck.closest('.meld-options');
 
-            // A. Shuntsu logic: Shuntsu cannot be open (if pinfu is not set) and cannot be yaochu.
-            // This is independent of global settings but can be overridden by them.
-            const isShuntsuDisabled = isShuntsu;
-            isOpenCheck.disabled = isShuntsuDisabled;
-            isYaochuCheck.disabled = isShuntsuDisabled;
-            openOptionCell.classList.toggle('option-disabled', isShuntsuDisabled);
-            yaochuOptionCell.classList.toggle('option-disabled', isShuntsuDisabled);
+            // A shuntsu (sequence) cannot contain a yaochu (terminal/honor) tile. This is always true.
+            isYaochuCheck.disabled = isShuntsu;
+            yaochuOptionCell.classList.toggle('option-disabled', isShuntsu);
             if (isShuntsu) {
-                isOpenCheck.checked = false;
                 isYaochuCheck.checked = false;
             }
 
-            // B. Global overrides (Pinfu / Tanyao)
+            // --- Global Overrides (Pinfu, Tanyao, Chiitoitsu) ---
+            const isPinfuActive = isPinfu && !isChiitoitsu;
+
+            // Lock the meld type selectors if Pinfu is chosen, as it requires 4 shuntsu.
             const shuntsuRadio = group.querySelector(`#meld${id}-shuntsu`);
             const koutsuRadio = group.querySelector(`#meld${id}-koutsu`);
             const kantsuRadio = group.querySelector(`#meld${id}-kantsu`);
+            shuntsuRadio.disabled = isPinfuActive;
+            koutsuRadio.disabled = isPinfuActive;
+            kantsuRadio.disabled = isPinfuActive;
 
-            // Pinfu forces closed shuntsu, overriding the above.
-            const isPinfuMeldLock = isPinfu && !isChiitoitsu;
-            shuntsuRadio.disabled = isPinfuMeldLock;
-            koutsuRadio.disabled = isPinfuMeldLock;
-            kantsuRadio.disabled = isPinfuMeldLock;
+            // The 'open' (naki) checkbox should be disabled ONLY if Pinfu is selected.
+            // Chiitoitsu disabling is handled by the parent fieldset. This prevents conflicts.
+            isOpenCheck.disabled = isPinfuActive;
+            openOptionCell.classList.toggle('option-disabled', isPinfuActive);
 
-            // When Pinfu is active, the "Open" checkbox MUST be disabled and unchecked.
-            if (isPinfuMeldLock) {
-                shuntsuRadio.checked = true; // Force shuntsu
-                isOpenCheck.checked = false; // Force closed
-                isOpenCheck.disabled = true; // Disable the checkbox itself
-                openOptionCell.classList.add('option-disabled'); // Apply visual disabled style
-            } else {
-                 // Re-evaluate disabled state only if Pinfu is NOT locking it.
-                isOpenCheck.disabled = isShuntsu;
+            // If Pinfu is active, enforce its rules on the UI.
+            if (isPinfuActive) {
+                shuntsuRadio.checked = true; // Pinfu requires shuntsu.
+                isOpenCheck.checked = false; // Pinfu must be closed.
             }
 
-            // Tanyao forces non-yaochu. Pinfu also forces non-yaochu.
-            // This is a stronger condition than just shuntsu.
+            // Tanyao (all simples) and Pinfu both forbid yaochu tiles.
             const isYaochuLockedOut = (isTanyao || isPinfu) && !isChiitoitsu;
-            isYaochuCheck.disabled = isYaochuLockedOut || isShuntsu; // Re-evaluate disabled state
+            isYaochuCheck.disabled = isYaochuLockedOut || isShuntsu; // Re-evaluate disabled state for yaochu
             if (isYaochuLockedOut) {
                 isYaochuCheck.checked = false;
             }
-            // Ensure visual state is correct if Tanyao/Pinfu is on
-            if(isYaochuLockedOut) {
-                 yaochuOptionCell.classList.add('option-disabled');
-            } else if (!isShuntsu) {
-                 yaochuOptionCell.classList.remove('option-disabled');
-            }
+            // Ensure visual state for yaochu is correct based on all conditions
+            yaochuOptionCell.classList.toggle('option-disabled', isYaochuLockedOut || isShuntsu);
         });
 
         // Pinfu forces a ryanmen wait, Chiitoitsu forces tanki
@@ -242,14 +232,23 @@ document.addEventListener('DOMContentLoaded', () => {
             return fuBreakdown;
         }
 
-        // Tsumo Pinfu is a special case, fixed at 20 fu.
-        if (state.isPinfu && !isRon) {
-            fuBreakdown.special = '平和ツモ';
-            fuBreakdown.base = 20;
-            // All other fu components are 0. Tsumo fu is ignored.
-            fuBreakdown.unrounded = 20;
-            fuBreakdown.rounded = 20;
-            return fuBreakdown;
+        // Pinfu has special fu rules: 20 for Tsumo, 30 for Ron.
+        if (state.isPinfu) {
+            if (isRon) {
+                fuBreakdown.special = '平和ロン';
+                fuBreakdown.base = 20;
+                fuBreakdown.winMethod = 10; // Menzen ron fu
+                fuBreakdown.unrounded = 30;
+                fuBreakdown.rounded = 30;
+                return fuBreakdown;
+            } else { // Tsumo
+                fuBreakdown.special = '平和ツモ';
+                fuBreakdown.base = 20;
+                // All other fu components are 0. Tsumo fu is ignored.
+                fuBreakdown.unrounded = 20;
+                fuBreakdown.rounded = 20;
+                return fuBreakdown;
+            }
         }
 
         let fu = 20;
@@ -579,20 +578,12 @@ document.addEventListener('DOMContentLoaded', () => {
         updateState();
         updateHanButtons();
 
-        // --- New Fu Calculation Logic based on user request ---
-        // 1. Calculate Tsumo fu first, as it's the base for the custom rule.
+        // --- Fu Calculation Logic ---
+        // Calculate fu for both Ron and Tsumo scenarios independently.
+        // The calculateFu function will correctly apply the 10 fu for a closed ron
+        // or the 2 fu for a tsumo, based on the isRon flag and the hand's state.
+        const fuBreakdownRon = calculateFu(true); // isRon = true
         const fuBreakdownTsumo = calculateFu(false); // isRon = false
-
-        let fuBreakdownRon;
-        // 2. Derive Ron fu. Special hands like Chiitoitsu and Pinfu are not affected by the custom rule.
-        if (state.handType === 'chiitoitsu' || state.isPinfu) {
-            fuBreakdownRon = calculateFu(true);
-        } else {
-            // For all other hands, apply the custom rule: Ron fu (unrounded) = Tsumo fu (unrounded) + 2.
-            fuBreakdownRon = JSON.parse(JSON.stringify(fuBreakdownTsumo)); // Deep copy
-            fuBreakdownRon.unrounded = fuBreakdownTsumo.unrounded + 2;
-            fuBreakdownRon.rounded = (fuBreakdownRon.unrounded === 25) ? 25 : Math.ceil(fuBreakdownRon.unrounded / 10) * 10;
-        }
 
         const scoreRon = calculateScore(state.han, fuBreakdownRon.rounded, state.isOya);
         const scoreTsumo = calculateScore(state.han, fuBreakdownTsumo.rounded, state.isOya);
