@@ -28,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Global Modifiers
         isPinfu: document.getElementById('is-pinfu'),
-        isTanyao: document.getElementById('is-tanyao'),
 
         // Melds - .meld-group is the class for each <tr> in the melds table
         meldGroups: document.querySelectorAll('.meld-group'),
@@ -94,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (state.handType === 'standard') {
             state.isPinfu = elements.isPinfu.checked;
-            state.isTanyao = elements.isTanyao.checked;
             state.wait = elements.waitType.value;
             state.pair = {
                 isYakuhai: elements.pairIsYakuhai.checked
@@ -111,7 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
             state.isMenzen = state.melds.every(meld => !meld.isOpen);
         } else { // Chiitoitsu
             state.isPinfu = false;
-            state.isTanyao = elements.isTanyao.checked; // Tanyao can be combined
+            // For Chiitoitsu, we cannot determine Tanyao from the UI, so assume false.
+            // A more advanced UI would be needed to specify all 7 pairs.
             state.isMenzen = true;
             state.wait = 'tanki';
             state.pair = {};
@@ -121,12 +120,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * 選択された役（七対子、タンヤオ、平和）に応じて、
+     * 選択された役（七対子、平和）に応じて、
      * UIの見た目を更新（アクティブ状態のCSSクラスを切り替え）します。
      */
     function updateYakuVisuals() {
         elements.isChiitoitsu.closest('.yaku-selector')?.classList.toggle('yaku-active', elements.isChiitoitsu.checked);
-        elements.isTanyao.closest('.yaku-selector')?.classList.toggle('yaku-active', elements.isTanyao.checked);
         elements.isPinfu.closest('.yaku-selector')?.classList.toggle('yaku-active', elements.isPinfu.checked);
     }
 
@@ -147,7 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateControlStates() {
         const isChiitoitsu = elements.isChiitoitsu.checked;
         const isPinfu = elements.isPinfu.checked;
-        const isTanyao = elements.isTanyao.checked;
 
         // --- 1. Chiitoitsu disables standard hand inputs ---
         elements.standardHandFieldset.disabled = isChiitoitsu;
@@ -202,8 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 isOpenCheck.checked = false; // Pinfu must be closed.
             }
 
-            // Tanyao (all simples) and Pinfu both forbid yaochu tiles.
-            const isYaochuLockedOut = (isTanyao || isPinfu) && !isChiitoitsu;
+            // Pinfu forbids yaochu tiles.
+            const isYaochuLockedOut = isPinfu && !isChiitoitsu;
             isYaochuCheck.disabled = isYaochuLockedOut || isShuntsu; // Re-evaluate disabled state for yaochu
             if (isYaochuLockedOut) {
                 isYaochuCheck.checked = false;
@@ -223,8 +220,8 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.waitType.disabled = false;
         }
 
-        // Pair's yakuhai status is disabled by Pinfu OR Tanyao
-        const pairYakuhaiDisabled = isPinfu || isTanyao;
+        // Pair's yakuhai status is disabled by Pinfu
+        const pairYakuhaiDisabled = isPinfu;
         elements.pairIsYakuhai.disabled = pairYakuhaiDisabled;
         if (pairYakuhaiDisabled) {
             elements.pairIsYakuhai.checked = false;
@@ -673,8 +670,8 @@ document.addEventListener('DOMContentLoaded', () => {
      * ユーザー入力があるたびに呼び出されます。
      */
     function mainUpdate() {
-        updateControlStates();
         updateState();
+        updateControlStates();
         updateHanButtons();
 
         // --- Fu Calculation Logic ---
@@ -711,7 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Create a single list of all controls that trigger a recalculation
         const allControls = [
             elements.isKo, elements.isOya, elements.hanInput,
-            elements.isChiitoitsu, elements.isPinfu, elements.isTanyao,
+            elements.isChiitoitsu, elements.isPinfu,
             elements.waitType,
             elements.pairIsYakuhai,
             elements.tableViewRon,
